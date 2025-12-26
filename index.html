@@ -1,294 +1,40 @@
-import 'package:flutter/material.dart';
-import 'dart:math';
-import 'dart:async';
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Arif Bingo - Telegram Mini App">
 
-void main() {
-  runApp(const MaterialApp(
-    home: BingoMainApp(),
-    debugShowCheckedModeBanner: false,
-  ));
-}
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Arif Bingo">
 
-class MockData {
-  static double userBalance = 100.0;
-}
-
-class BingoMainApp extends StatefulWidget {
-  const BingoMainApp({super.key});
-
-  @override
-  State<BingoMainApp> createState() => _BingoMainAppState();
-}
-
-class _BingoMainAppState extends State<BingoMainApp> {
-  void _refresh() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5),
-      appBar: AppBar(
-        title: const Text(
-          "ARIF BINGO",
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 3.0,
-            color: Colors.white,
-            shadows: <Shadow>[
-              Shadow(
-                blurRadius: 8.0,
-                color: Colors.black45,
-                offset: Offset(2.0, 2.0),
-              ),
-            ],
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF1A237E),
-        elevation: 8,
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: Center(
-              child: Text(
-                "ብር: ${MockData.userBalance.toStringAsFixed(0)}",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)
-              )
-            ),
-          ),
-        ],
-      ),
-      body: BingoGamePage(onUpdate: _refresh),
-    );
-  }
-}
-
-class BingoGamePage extends StatefulWidget {
-  final VoidCallback onUpdate;
-  const BingoGamePage({super.key, required this.onUpdate});
-
-  @override
-  State<BingoGamePage> createState() => _BingoGamePageState();
-}
-
-class _BingoGamePageState extends State<BingoGamePage> {
-  final Random _random = Random();
-  final List<int> _cardNumbers = List<int>.filled(25, 0);
-  final List<int> _drawnNumbers = <int>[];
-  final List<Map<String, dynamic>> _history = <Map<String, dynamic>>[];
-  final List<int> _markedIndexes = <int>[12];
-  int? _currentNumber;
-  String _currentLetter = "";
-  Color _currentColor = Colors.indigo;
-  Timer? _gameTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _generateBingoCard();
-    _startGame();
-  }
-
-  void _generateBingoCard() {
-    final List<int> b = _getRandomList(1, 15, 5);
-    final List<int> i = _getRandomList(16, 30, 5);
-    final List<int> n = _getRandomList(31, 45, 5);
-    final List<int> g = _getRandomList(46, 60, 5);
-    final List<int> o = _getRandomList(61, 75, 5);
-
-    setState(() {
-      for (int row = 0; row < 5; row++) {
-        _cardNumbers[row * 5 + 0] = b[row];
-        _cardNumbers[row * 5 + 1] = i[row];
-        _cardNumbers[row * 5 + 2] = n[row];
-        _cardNumbers[row * 5 + 3] = g[row];
-        _cardNumbers[row * 5 + 4] = o[row];
-      }
-      _cardNumbers[12] = 0;
-    });
-  }
-
-  List<int> _getRandomList(int min, int max, int count) {
-    final List<int> list = List<int>.generate(max - min + 1, (int i) => i + min);
-    list.shuffle();
-    return list.take(count).toList();
-  }
-
-  void _startGame() {
-    _gameTimer = Timer.periodic(const Duration(seconds: 5), (Timer timer) {
-      if (_drawnNumbers.length < 75 && mounted) {
-        int nextNum;
-        do {
-          nextNum = _random.nextInt(75) + 1;
-        } while (_drawnNumbers.contains(nextNum));
-
-        setState(() {
-          _currentNumber = nextNum;
-          _currentLetter = _getLetter(nextNum);
-          _currentColor = _getColor(nextNum);
-          _drawnNumbers.add(nextNum);
-          _history.insert(0, <String, dynamic>{
-            'text': "$_currentLetter-$_currentNumber",
-            'color': _currentColor
+  <title>Arif Bingo</title>
+  <style>
+    body { background-color: #1A237E; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; color: white; font-family: sans-serif; }
+  </style>
+  
+  <script src="https://unpkg.com/canvaskit-wasm@0.37.0/bin/canvaskit.js"></script>
+</head>
+<body>
+  <div id="loading">Loading Arif Bingo...</div>
+  
+  <script src="https://www.gstatic.com/flutter-canvaskit/0.37.0/flutter.js"></script>
+  <script>
+    // እዚህ ጋር ነው የጻፍከው የ Flutter ኮድ የሚቀመጠው
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          keepAlive: true,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
           });
-        });
-      }
+        }
+      });
     });
-  }
-
-  String _getLetter(int n) => n <= 15 ? "B" : n <= 30 ? "I" : n <= 45 ? "N" : n <= 60 ? "G" : "O";
-
-  Color _getColor(int n) {
-    if (n <= 15) return Colors.redAccent;
-    if (n <= 30) return Colors.blueAccent;
-    if (n <= 45) return Colors.orangeAccent;
-    if (n <= 60) return Colors.greenAccent[700]!;
-    return Colors.purpleAccent;
-  }
-
-  void _handleTap(int index) {
-    if (index == 12) return;
-    final int selectedNum = _cardNumbers[index];
-    if (_drawnNumbers.contains(selectedNum) && !_markedIndexes.contains(index)) {
-      setState(() => _markedIndexes.add(index));
-    }
-  }
-
-  @override
-  void dispose() {
-    _gameTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        const SizedBox(height: 20),
-        _buildEqualDisplay(),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 50,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            itemCount: _history.length,
-            itemBuilder: (BuildContext context, int index) {
-              final Map<String, dynamic> item = _history[index];
-              final Color itemColor = item['color'] as Color;
-              final String itemText = item['text'] as String;
-              
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: itemColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: itemColor),
-                ),
-                child: Center(
-                  child: Text(
-                    itemText,
-                    style: TextStyle(color: itemColor, fontWeight: FontWeight.bold)
-                  )
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const <BoxShadow>[
-                BoxShadow(color: Colors.black12, blurRadius: 10)
-              ],
-            ),
-            child: Column(
-              children: <Widget>[
-                _buildBingoHeader(),
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(10),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 5,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 8
-                    ),
-                    itemCount: 25,
-                    itemBuilder: (BuildContext context, int index) => _buildGridCell(index),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEqualDisplay() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: _currentColor, width: 5),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 8))
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(_currentLetter.isEmpty ? "R" : _currentLetter, style: TextStyle(fontSize: 60, fontWeight: FontWeight.w900, color: _currentColor)),
-          const SizedBox(width: 15),
-          Container(width: 4, height: 60, color: Colors.grey[300]),
-          const SizedBox(width: 15),
-          Text(_currentNumber == null ? "00" : "$_currentNumber", style: const TextStyle(fontSize: 60, fontWeight: FontWeight.w900, color: Colors.black87)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBingoHeader() {
-    const List<String> letters = <String>["B", "I", "N", "G", "O"];
-    final List<Color> colors = <Color>[Colors.red, Colors.blue, Colors.orange, Colors.green, Colors.purple];
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List<Widget>.generate(5, (int i) => Text(letters[i], style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: colors[i]))),
-      ),
-    );
-  }
-
-  Widget _buildGridCell(int index) {
-    final bool isMarked = _markedIndexes.contains(index);
-    return GestureDetector(
-      onTap: () => _handleTap(index),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isMarked ? Colors.green : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isMarked ? Colors.green : Colors.grey[300]!),
-        ),
-        child: Center(
-          child: Text(
-            index == 12 ? "FREE" : "${_cardNumbers[index]}",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: isMarked ? Colors.white : Colors.indigo[900]
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+  </script>
+</body>
+</html>
