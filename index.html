@@ -1,40 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base href="/">
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Arif Bingo - Telegram Mini App">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Arif Bingo">
-
   <title>Arif Bingo</title>
+  <script src="https://unpkg.com/dart-sdk@2.19.6/lib/dart_sdk.js"></script>
+  <script src="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_web_sdk.zip"></script>
   <style>
-    body { background-color: #1A237E; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; color: white; font-family: sans-serif; }
+    body { margin: 0; background: #1A237E; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
   </style>
-  
-  <script src="https://unpkg.com/canvaskit-wasm@0.37.0/bin/canvaskit.js"></script>
 </head>
 <body>
-  <div id="loading">Loading Arif Bingo...</div>
-  
-  <script src="https://www.gstatic.com/flutter-canvaskit/0.37.0/flutter.js"></script>
-  <script>
-    // እዚህ ጋር ነው የጻፍከው የ Flutter ኮድ የሚቀመጠው
-    window.addEventListener('load', function(ev) {
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          keepAlive: true,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
-        }
-      });
-    });
-  </script>
-</body>
+  <div id="status">Loading Arif Bingo...</div>
+  </body>
 </html>
