@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'dart:html' as html; // ለዳርትፓድ LocalStorage ለመጠቀም
+import 'dart:html' as html;
 
 void main() {
   runApp(const BingoApp());
@@ -13,6 +13,7 @@ class BingoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'ቢንጎ ጨዋታ',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.indigo,
@@ -22,7 +23,6 @@ class BingoApp extends StatelessWidget {
   }
 }
 
-// የተጠቃሚ ምዝገባን የሚቆጣጠር ክፍል
 class BingoAuthWrapper extends StatefulWidget {
   const BingoAuthWrapper({super.key});
 
@@ -36,7 +36,7 @@ class _BingoAuthWrapperState extends State<BingoAuthWrapper> {
   @override
   void initState() {
     super.initState();
-    // የተቀመጠ ስም ካለ መፈተሽ (Persistence logic)
+    // የተቀመጠ ስም ካለ ከ LocalStorage መፈለግ
     userName = html.window.localStorage['bingo_user_name'];
   }
 
@@ -56,7 +56,6 @@ class _BingoAuthWrapperState extends State<BingoAuthWrapper> {
   }
 }
 
-// የምዝገባ ገጽ
 class RegistrationPage extends StatelessWidget {
   final Function(String) onRegister;
   RegistrationPage({super.key, required this.onRegister});
@@ -72,22 +71,28 @@ class RegistrationPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("እንኳን ወደ ቢንጎ ጨዋታ መጡ", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _controller,
-                decoration: const InputDecoration(
-                  labelText: "ስምዎን ያስገቡ",
-                  border: OutlineInputBorder(),
+              const Text("እንኳን ወደ ቢንጎ ጨዋታ መጡ", 
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.indigo)),
+              const SizedBox(height: 30),
+              SizedBox(
+                maxWidth: 400,
+                child: TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    labelText: "ስምዎን ያስገቡ",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  if (_controller.text.isNotEmpty) {
-                    onRegister(_controller.text);
+                  if (_controller.text.trim().isNotEmpty) {
+                    onRegister(_controller.text.trim());
                   }
                 },
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
                 child: const Text("ይመዝገቡ"),
               )
             ],
@@ -131,11 +136,13 @@ class _BingoGamePageState extends State<BingoGamePage> {
       drawnNumbers.clear();
       currentNumber = null;
       hasWon = false;
+      
       List<int> b = _rand(1, 15, 5);
       List<int> i = _rand(16, 30, 5);
       List<int> n = _rand(31, 45, 4);
       List<int> g = _rand(46, 60, 5);
       List<int> o = _rand(61, 75, 5);
+
       for (int r = 0; r < 5; r++) {
         board.add(BingoCell(number: b[r]));
         board.add(BingoCell(number: i[r]));
@@ -152,56 +159,72 @@ class _BingoGamePageState extends State<BingoGamePage> {
 
   List<int> _rand(int min, int max, int count) {
     Set<int> nums = {};
-    while (nums.length < count) nums.add(min + Random().nextInt(max - min + 1));
+    while (nums.length < count) {
+      nums.add(min + Random().nextInt(max - min + 1));
+    }
     return nums.toList();
   }
 
   void _draw() {
     if (hasWon || drawnNumbers.length >= 75) return;
     int next;
-    do { next = 1 + Random().nextInt(75); } while (drawnNumbers.contains(next));
+    do { 
+      next = 1 + Random().nextInt(75); 
+    } while (drawnNumbers.contains(next));
+
     setState(() {
       currentNumber = next;
       drawnNumbers.add(next);
-      for (var c in board) { if (c.number == next) c.isMarked = true; }
-      _check();
+      for (var c in board) { 
+        if (c.number == next) c.isMarked = true; 
+      }
+      _checkWin();
     });
   }
 
-  void _check() {
-    // 1. ረድፎችን እና አምዶችን መፈተሽ
+  void _checkWin() {
+    bool win = false;
     for (int i = 0; i < 5; i++) {
-      if (board.skip(i * 5).take(5).every((c) => c.isMarked)) _win(); // Row
-      if ([0, 5, 10, 15, 20].every((j) => board[i + j].isMarked)) _win(); // Col
+      if (board.skip(i * 5).take(5).every((c) => c.isMarked)) win = true;
+      if ([0, 5, 10, 15, 20].every((j) => board[i + j].isMarked)) win = true;
     }
-    // 2. ዲያጎናል (Diagonal) መፈተሽ
-    if ([0, 6, 12, 18, 24].every((i) => board[i].isMarked)) _win();
-    if ([4, 8, 12, 16, 20].every((i) => board[i].isMarked)) _win();
-    
-    // 3. አራት ማዕዘኖች (Four Corners) መፈተሽ
-    if (board[0].isMarked && board[4].isMarked && board[20].isMarked && board[24].isMarked) _win();
+    if ([0, 6, 12, 18, 24].every((i) => board[i].isMarked)) win = true;
+    if ([4, 8, 12, 16, 20].every((i) => board[i].isMarked)) win = true;
+    if (board[0].isMarked && board[4].isMarked && board[20].isMarked && board[24].isMarked) win = true;
+
+    if (win) {
+      setState(() => hasWon = true);
+      _showWinDialog();
+    }
   }
 
-  void _win() {
-    if (hasWon) return;
-    setState(() => hasWon = true);
-    showDialog(context: context, builder: (_) => AlertDialog(
-      title: const Text("ቢንጎ!"),
-      content: Text("እንኳን ደስ አለዎት ${widget.userName}! አሸንፈዋል!"),
-      actions: [TextButton(onPressed: () { Navigator.pop(context); _generateBoard(); }, child: const Text("እንደገና"))],
-    ));
+  void _showWinDialog() {
+    showDialog(
+      context: context, 
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("ቢንጎ!", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+        content: Text("እንኳን ደስ አለዎት ${widget.userName}! አሸንፈዋል።"),
+        actions: [TextButton(onPressed: () { Navigator.pop(context); _generateBoard(); }, child: const Text("እንደገና"))],
+      )
+    );
   }
 
   void _showRules() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("የጨዋታ ደንብ"),
-        content: const Text(
-          "ማሸነፍ የሚቻለው የሚከተሉት ሲሟሉ ነው፡\n\n"
-          "1. በአግድም ወይም በቁልቁል ቀጥ ያለ መስመር መስራት ሲቻል\n"
-          "2. በዲያጎናል (ከማዕዘን እስከ ማዕዘን) መስመር መስራት ሲቻል\n"
-          "3. በሰንጠረዡ አራቱም ጫፎች ላይ ያሉትን ቁጥሮች ማግኘት ሲቻል"
+        title: const Text("የቢንጎ ጨዋታ ደንብ"),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("ማሸነፍ የሚቻለው የሚከተሉት ሲሟሉ ነው፦", style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 10),
+            Text("• በአግድም ወይም በቁልቁል ቀጥ ያለ መስመር መስራት ሲቻል"),
+            Text("• በዲያጎናል መስመር መስራት ሲቻል"),
+            Text("• በሰንጠረዡ አራቱም ጫፎች ላይ ያሉትን ቁጥሮች ማግኘት ሲቻል"),
+          ],
         ),
         actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("እሺ"))],
       ),
@@ -212,32 +235,72 @@ class _BingoGamePageState extends State<BingoGamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("ተጫዋች: ${widget.userName}"),
+        title: Text("ቢንጎ ጨዋታ - ${widget.userName}"),
         actions: [
-          IconButton(onPressed: _showRules, icon: const Icon(Icons.info_outline)),
-          TextButton(onPressed: _showRules, child: const Text("የጨዋታ ደንብ", style: TextStyle(color: Colors.white))),
+          TextButton.icon(
+            onPressed: _showRules, 
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            label: const Text("የጨዋታ ደንብ", style: TextStyle(color: Colors.white)),
+          ),
         ],
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
       ),
-      body: Column(children: [
-        Container(width: double.infinity, padding: const EdgeInsets.all(20), color: Colors.indigo.shade50,
-          child: Column(children: [
-            Text(currentNumber == null ? "ለመጀመር ቁልፉን ይጫኑ" : "የተጠራው፡ $currentNumber", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text("የተጠሩ ቁጥሮች ብዛት፡ ${drawnNumbers.length}"),
-          ])),
-        Expanded(child: Padding(padding: const EdgeInsets.all(10), child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 5, mainAxisSpacing: 5),
-          itemCount: 25, itemBuilder: (_, i) => Container(
-            decoration: BoxDecoration(color: board[i].isMarked ? Colors.green : Colors.white, border: Border.all(color: Colors.indigo), borderRadius: BorderRadius.circular(5)),
-            child: Center(child: board[i].isFreeSpace ? const Icon(Icons.star, color: Colors.orange) : Text("${board[i].number}", style: TextStyle(color: board[i].isMarked ? Colors.white : Colors.black, fontWeight: FontWeight.bold))),
-          )))),
-        Padding(padding: const EdgeInsets.all(20), child: Row(children: [
-          Expanded(child: ElevatedButton(onPressed: hasWon ? null : _draw, child: const Text("ቁጥር ጥራ"))),
-          const SizedBox(width: 10),
-          ElevatedButton(onPressed: _generateBoard, child: const Text("እንደገና")),
-        ]))
-      ]),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity, padding: const EdgeInsets.all(20), color: Colors.indigo.shade50,
+            child: Column(
+              children: [
+                Text(currentNumber == null ? "ለመጀመር 'ቁጥር ጥራ' ይጫኑ" : "የተጠራው ቁጥር፦ $currentNumber", 
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text("የተጠሩ ቁጥሮች ብዛት፦ ${drawnNumbers.length}"),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(15), 
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 8, mainAxisSpacing: 8),
+                itemCount: 25, 
+                itemBuilder: (_, i) => Container(
+                  decoration: BoxDecoration(
+                    color: board[i].isMarked ? Colors.green : Colors.white, 
+                    border: Border.all(color: Colors.indigo), 
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: board[i].isFreeSpace 
+                      ? const Icon(Icons.star, color: Colors.orange, size: 30) 
+                      : Text("${board[i].number}", style: TextStyle(fontSize: 18, color: board[i].isMarked ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                )
+              ),
+            )
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20), 
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: hasWon ? null : _draw, 
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 15)),
+                    child: const Text("ቁጥር ጥራ", style: TextStyle(fontSize: 18))
+                  )
+                ),
+                const SizedBox(width: 15),
+                ElevatedButton(
+                  onPressed: _generateBoard, 
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20)),
+                  child: const Text("እንደገና", style: TextStyle(fontSize: 18))
+                ),
+              ],
+            )
+          )
+        ],
+      ),
     );
   }
 }
