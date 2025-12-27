@@ -3,129 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>አሪፍ ቢንጎ - Arif Bingo</title>
+    <title>ARIF BINGO - Ultimate Edition</title>
     <style>
-        :root { --primary: #facc15; --bg: #0f172a; --card-bg: #1e293b; --accent: #3b82f6; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; text-align: center; }
+        :root { --gold: #facc15; --blue: #1e3a8a; --dark: #020617; --red: #ef4444; --glass: rgba(255, 255, 255, 0.1); }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* Caller Box Design */
-        .caller-box { background: linear-gradient(135deg, #1e3a8a, #3b82f6); margin: 15px; padding: 20px; border-radius: 20px; border: 3px solid var(--primary); box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
-        .current-number { font-size: 3.5rem; font-weight: 900; color: var(--primary); text-shadow: 3px 3px 0 #000; }
-        .timer-bar { height: 5px; background: var(--primary); width: 100%; margin-top: 10px; border-radius: 5px; transition: width 5s linear; }
+        /* Logo Section */
+        .logo-container { padding: 25px 0 10px 0; text-align: center; }
+        .logo-text { font-size: 3rem; font-weight: 900; color: var(--gold); letter-spacing: 5px; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 4px 4px 0px #1e40af; font-family: 'Arial Black', sans-serif; }
 
-        /* History */
-        .history { font-size: 0.9rem; color: #94a3b8; margin: 10px; min-height: 20px; overflow-x: auto; white-space: nowrap; }
+        /* Registration Overlay */
+        #registration { position: fixed; inset: 0; background: var(--dark); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .reg-card { background: var(--card-bg); padding: 30px; border-radius: 25px; border: 2px solid var(--gold); width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(250, 204, 21, 0.2); }
+        input[type="tel"] { width: 100%; padding: 15px; margin: 20px 0; border-radius: 12px; border: none; font-size: 1.2rem; text-align: center; box-sizing: border-box; }
+        .btn-start { background: var(--gold); color: black; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; width: 100%; }
 
-        /* Payment & Bonus */
-        .stats-bar { display: flex; justify-content: space-around; background: #1e293b; padding: 10px; border-bottom: 2px solid var(--primary); }
-        .bonus-info { color: #4ade80; font-size: 0.8rem; }
+        /* Number Caller Box */
+        .caller-outer { width: 90%; max-width: 360px; background: linear-gradient(145deg, #1e3a8a, #1e40af); padding: 20px; border-radius: 25px; border: 4px solid var(--gold); box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-bottom: 20px; position: relative; }
+        .caller-letter { font-size: 1.8rem; font-weight: bold; color: var(--gold); display: block; margin-bottom: -10px; }
+        .caller-number { font-size: 5rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        .progress-bar { height: 6px; background: var(--gold); width: 100%; position: absolute; bottom: 0; left: 0; border-radius: 0 0 20px 20px; transition: width 5s linear; }
 
-        /* Bingo Card */
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #1e3a8a; padding: 10px; border-radius: 15px; max-width: 330px; margin: 0 auto; }
-        .cell { width: 55px; height: 55px; background: white; color: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; border-radius: 8px; cursor: pointer; }
-        .cell.marked { background: #ef4444; color: white; transform: scale(0.95); }
+        /* Bingo Card Header */
+        .card-header { display: grid; grid-template-columns: repeat(5, 1fr); width: 340px; margin-bottom: 8px; }
+        .h-cell { font-size: 2rem; font-weight: 900; color: var(--gold); text-align: center; text-shadow: 2px 2px #000; }
 
-        /* Bottom Menu */
-        .footer-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
-        .pay-btn { background: #334155; padding: 12px; border-radius: 10px; font-size: 0.75rem; cursor: pointer; border: 1px solid var(--primary); }
+        /* Grid System */
+        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 340px; background: rgba(30, 58, 138, 0.5); padding: 12px; border-radius: 20px; backdrop-filter: blur(10px); }
+        .cell { aspect-ratio: 1/1; background: #fff; color: var(--blue); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 800; cursor: pointer; border-bottom: 4px solid #cbd5e1; transition: all 0.2s; }
+        .cell.marked { background: var(--red) !important; color: white !important; border-bottom: none; transform: scale(0.95); box-shadow: inset 0 5px 10px rgba(0,0,0,0.3); }
+
+        /* History & Payments */
+        .history { width: 90%; background: var(--glass); margin: 15px 0; padding: 10px; border-radius: 10px; font-size: 0.8rem; color: #cbd5e1; }
+        .footer-payment { width: 100%; background: #1e293b; padding: 20px; border-top: 4px solid var(--gold); margin-top: auto; }
+        .pay-number { font-size: 1.2rem; color: var(--gold); font-weight: bold; letter-spacing: 1px; }
+
+        /* Win Modal */
+        #winModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .win-box { background: var(--gold); color: #000; padding: 40px; border-radius: 30px; transform: scale(0); transition: 0.5s ease-out; }
     </style>
 </head>
 <body>
 
-    <div class="stats-bar">
-        <div>💰 1 ጨዋታ: 10 ETB</div>
-        <div class="bonus-info" id="bonusText">🎁 10 ጊዜ ተጫወት 1 በነጻ! (ቀሪ: 10)</div>
+    <div id="registration">
+        <div class="logo-text">ARIF BINGO</div>
+        <div class="reg-card">
+            <h2 style="margin-top:0">እንኳን ደህና መጡ!</h2>
+            <p>ለመጫወት ስልክ ቁጥርዎን ያስገቡ</p>
+            <input type="tel" id="phoneNumber" placeholder="09 / 07 ........">
+            <button class="btn-start" onclick="submitReg()">መዝገብና ጀምር</button>
+        </div>
     </div>
 
-    <div class="caller-box">
-        <div style="font-size: 0.9rem; margin-bottom: 5px;">አሁን የወጣ ቁጥር</div>
-        <div class="current-number" id="nowCalling">--</div>
-        <div class="timer-bar" id="timer"></div>
+    <div id="winModal">
+        <div class="win-box" id="winBox">
+            <h1 style="font-size:3rem">🏆</h1>
+            <h2>እንኳን ደስ አለህ!</h2>
+            <p style="font-size:1.2rem">አንተ የዚህ ጨዋታ <b>አሸናፊ</b> ነህ!</p>
+            <button class="btn-start" style="background:#000; color:#fff" onclick="location.reload()">ድጋሚ ተጫወት</button>
+        </div>
     </div>
 
-    <div class="history" id="callHistory">የወጡ ቁጥሮች: </div>
-
-    <div class="grid" id="bingoGrid"></div>
-
-    <div class="footer-menu">
-        <div class="pay-btn" onclick="showPay('telebirr')">📲 ቴሌብር</div>
-        <div class="pay-btn" onclick="showPay('cbe')">🏦 ሲቢኢ ብር</div>
-        <div class="pay-btn" onclick="alert('ማረጋገጫዎን ወደ @Admin ይላኩ')">✔️ ማረጋገጫ</div>
+    <div class="logo-container">
+        <div class="logo-text">ARIF BINGO</div>
     </div>
 
-    <button style="background:var(--primary); width:90%; padding:15px; border-radius:50px; border:none; font-weight:bold; font-size:1.1rem;" onclick="startGame()">ጨዋታ ጀምር (10 ETB)</button>
+    <div class="caller-outer">
+        <span class="caller-letter" id="letterLabel">ተዘጋጁ...</span>
+        <div class="caller-number" id="numberLabel">--</div>
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div class="history" id="historyText">የወጡ ቁጥሮች: </div>
+
+    <div class="card-header">
+        <div class="h-cell">B</div><div class="h-cell">I</div><div class="h-cell">N</div><div class="h-cell">G</div><div class="h-cell">O</div>
+    </div>
+    <div class="bingo-grid" id="grid"></div>
+
+    <div class="footer-payment">
+        <div>የመክፈያ ቁጥር (ቴሌብር/CBE):</div>
+        <div class="pay-number">0906420377</div>
+        <div style="font-size: 0.8rem; margin-top:10px; opacity:0.7;">10 ጊዜ ለተጫወተ 1 በነጻ | ማረጋገጫ ለ @Admin ይላኩ</div>
+    </div>
 
     <script>
-        let gameActive = false;
         let calledNumbers = [];
-        let gamesPlayed = 0;
+        let markedIndices = new Set([12]); // FREE space is pre-marked
 
-        function showPay(method) {
-            let phone = "09XXXXXXXX"; // ያንተ የመቀበያ ቁጥር እዚህ ይግባ
-            alert(method.toUpperCase() + " መክፈያ ቁጥር: " + phone + "\nእባክህ 10 ብር ከፍለህ ማረጋገጫውን ላክ!");
+        function submitReg() {
+            const phone = document.getElementById('phoneNumber').value;
+            if(phone.length >= 10) {
+                document.getElementById('registration').style.display = 'none';
+                initGame();
+            } else { alert("እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ!"); }
         }
 
-        function generateBoard() {
-            const grid = document.getElementById('bingoGrid');
-            grid.innerHTML = '';
-            let columns = [[], [], [], [], []];
+        function initGame() {
+            createCard();
+            startCalling();
+        }
+
+        function createCard() {
+            const gridEl = document.getElementById('grid');
+            gridEl.innerHTML = '';
+            let cols = [[],[],[],[],[]];
             for(let i=0; i<5; i++) {
-                while(columns[i].length < 5) {
+                while(cols[i].length < 5) {
                     let r = Math.floor(Math.random() * 15) + (i * 15 + 1);
-                    if(!columns[i].includes(r)) columns[i].push(r);
+                    if(!cols[i].includes(r)) cols[i].push(r);
                 }
             }
-            for(let row=0; row<5; row++) {
-                for(let col=0; col<5; col++) {
+            let index = 0;
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
-                    let val = columns[col][row];
-                    if(row === 2 && col === 2) { cell.innerText = 'FREE'; cell.classList.add('marked'); }
-                    else { cell.innerText = val; cell.onclick = function() { this.classList.toggle('marked'); }; }
-                    grid.appendChild(cell);
+                    let val = (r===2 && c===2) ? 'FREE' : cols[c][r];
+                    let currentIdx = index;
+                    cell.innerText = val;
+                    if(val === 'FREE') cell.classList.add('marked');
+                    
+                    cell.onclick = function() {
+                        if(val === 'FREE') return;
+                        if(calledNumbers.includes(val)) {
+                            if(!this.classList.contains('marked')) {
+                                this.classList.add('marked');
+                                markedIndices.add(currentIdx);
+                                checkWinner();
+                            }
+                        } else {
+                            alert("ይህ ቁጥር ገና አልወጣም! እባክዎ እስኪወጣ ይጠብቁ።");
+                        }
+                    };
+                    gridEl.appendChild(cell);
+                    index++;
                 }
             }
         }
 
-        function startGame() {
-            if(gameActive) return;
-            gameActive = true;
-            calledNumbers = [];
-            document.getElementById('callHistory').innerText = "የወጡ ቁጥሮች: ";
-            generateBoard();
-            callNext();
-            
-            gamesPlayed++;
-            let remaining = 10 - (gamesPlayed % 10);
-            document.getElementById('bonusText').innerText = `🎁 10 ጊዜ ተጫወት 1 በነጻ! (ቀሪ: ${remaining})`;
+        function startCalling() {
+            const call = () => {
+                if(calledNumbers.length >= 75) { calledNumbers = []; }
+                let n;
+                do { n = Math.floor(Math.random() * 75) + 1; } while(calledNumbers.includes(n));
+                calledNumbers.push(n);
+                
+                let letters = ['B','I','N','G','O'];
+                let l = letters[Math.floor((n-1)/15)];
+                
+                document.getElementById('letterLabel').innerText = l;
+                document.getElementById('numberLabel').innerText = n;
+                
+                let hist = document.getElementById('historyText');
+                hist.innerText = "የወጡ ቁጥሮች: " + l + "-" + n + ", " + hist.innerText.replace("የወጡ ቁጥሮች: ", "").substring(0, 40);
+
+                // Progress animation
+                let bar = document.getElementById('progress');
+                bar.style.transition = 'none';
+                bar.style.width = '100%';
+                setTimeout(() => {
+                    bar.style.transition = 'width 5s linear';
+                    bar.style.width = '0%';
+                }, 50);
+            };
+            call();
+            setInterval(call, 5000);
         }
 
-        function callNext() {
-            if(!gameActive || calledNumbers.length >= 75) return;
-            
-            let r;
-            do { r = Math.floor(Math.random() * 75) + 1; } while (calledNumbers.includes(r));
-            
-            let letter = "BINGO"[Math.floor((r-1)/15)];
-            let call = letter + "-" + r;
-            
-            document.getElementById('nowCalling').innerText = call;
-            calledNumbers.push(r);
-            document.getElementById('callHistory').innerText += call + ", ";
-
-            // Timer Animation Reset
-            let timer = document.getElementById('timer');
-            timer.style.transition = 'none';
-            timer.style.width = '100%';
-            setTimeout(() => {
-                timer.style.transition = 'width 5s linear';
-                timer.style.width = '0%';
-            }, 50);
-
-            setTimeout(callNext, 5000);
+        function checkWinner() {
+            // Simple full card win logic
+            if(markedIndices.size === 25) {
+                const modal = document.getElementById('winModal');
+                const box = document.getElementById('winBox');
+                modal.style.display = 'flex';
+                setTimeout(() => { box.style.transform = 'scale(1)'; }, 100);
+            }
         }
-
-        generateBoard();
     </script>
 </body>
 </html>
