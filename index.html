@@ -16,7 +16,8 @@ class BingoApp extends StatelessWidget {
       title: 'ቢንጎ ጨዋታ',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
+        colorSchemeSeed: Colors.deepPurple,
+        brightness: Brightness.light,
       ),
       home: const BingoAuthWrapper(),
     );
@@ -36,7 +37,6 @@ class _BingoAuthWrapperState extends State<BingoAuthWrapper> {
   @override
   void initState() {
     super.initState();
-    // የተቀመጠ ስም ካለ ከ LocalStorage መፈለግ
     userName = html.window.localStorage['bingo_user_name'];
   }
 
@@ -65,37 +65,62 @@ class RegistrationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("እንኳን ወደ ቢንጎ ጨዋታ መጡ", 
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.indigo)),
-              const SizedBox(height: 30),
-              SizedBox(
-                maxWidth: 400,
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    labelText: "ስምዎን ያስገቡ",
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+      backgroundColor: Colors.white,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple.shade100, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Card(
+            elevation: 10,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.casino, size: 80, color: Colors.deepPurple),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "እንኳን ወደ ቢንጎ መጡ", 
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.deepPurple)
                   ),
-                ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: 300,
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        labelText: "ስምዎን ያስገቡ",
+                        prefixIcon: const Icon(Icons.face),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_controller.text.trim().isNotEmpty) {
+                        onRegister(_controller.text.trim());
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("ይመዝገቡ", style: TextStyle(fontSize: 18)),
+                  )
+                ],
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_controller.text.trim().isNotEmpty) {
-                    onRegister(_controller.text.trim());
-                  }
-                },
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
-                child: const Text("ይመዝገቡ"),
-              )
-            ],
+            ),
           ),
         ),
       ),
@@ -162,7 +187,9 @@ class _BingoGamePageState extends State<BingoGamePage> {
     while (nums.length < count) {
       nums.add(min + Random().nextInt(max - min + 1));
     }
-    return nums.toList();
+    var list = nums.toList();
+    list.sort();
+    return list;
   }
 
   void _draw() {
@@ -203,9 +230,26 @@ class _BingoGamePageState extends State<BingoGamePage> {
       context: context, 
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: const Text("ቢንጎ!", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-        content: Text("እንኳን ደስ አለዎት ${widget.userName}! አሸንፈዋል።"),
-        actions: [TextButton(onPressed: () { Navigator.pop(context); _generateBoard(); }, child: const Text("እንደገና"))],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Center(child: Text("🎉 ቢንጎ! 🎉", style: TextStyle(color: Colors.green, fontSize: 30, fontWeight: FontWeight.bold))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.emoji_events, size: 80, color: Colors.amber),
+            const SizedBox(height: 10),
+            Text("እንኳን ደስ አለዎት ${widget.userName}!", textAlign: TextAlign.center, style: const TextStyle(fontSize: 20)),
+            const Text("አሸናፊ ሆነዋል!", style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () { Navigator.pop(context); _generateBoard(); }, 
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+              child: const Text("እንደገና ይጫወቱ"),
+            ),
+          )
+        ],
       )
     );
   }
@@ -214,16 +258,19 @@ class _BingoGamePageState extends State<BingoGamePage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("የቢንጎ ጨዋታ ደንብ"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [Icon(Icons.rule, color: Colors.deepPurple), SizedBox(width: 10), Text("የቢንጎ ደንብ")],
+        ),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("ማሸነፍ የሚቻለው የሚከተሉት ሲሟሉ ነው፦", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            Text("• በአግድም ወይም በቁልቁል ቀጥ ያለ መስመር መስራት ሲቻል"),
-            Text("• በዲያጎናል መስመር መስራት ሲቻል"),
-            Text("• በሰንጠረዡ አራቱም ጫፎች ላይ ያሉትን ቁጥሮች ማግኘት ሲቻል"),
+            Divider(),
+            ListTile(leading: Icon(Icons.linear_scale, size: 20), title: Text("በአግድም ወይም በቁልቁል መስመር")),
+            ListTile(leading: Icon(Icons.diagonal_arrow_right_up, size: 20), title: Text("በሰያፍ (Diagonal) መስመር")),
+            ListTile(leading: Icon(Icons.grid_view, size: 20), title: Text("በአራቱም ጫፎች ማግኘት")),
           ],
         ),
         actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("እሺ"))],
@@ -234,67 +281,112 @@ class _BingoGamePageState extends State<BingoGamePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text("ቢንጎ ጨዋታ - ${widget.userName}"),
         actions: [
-          TextButton.icon(
-            onPressed: _showRules, 
-            icon: const Icon(Icons.info_outline, color: Colors.white),
-            label: const Text("የጨዋታ ደንብ", style: TextStyle(color: Colors.white)),
-          ),
+          IconButton(onPressed: _showRules, icon: const Icon(Icons.info_outline)),
         ],
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Column(
         children: [
           Container(
-            width: double.infinity, padding: const EdgeInsets.all(20), color: Colors.indigo.shade50,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple,
+              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+            ),
             child: Column(
               children: [
-                Text(currentNumber == null ? "ለመጀመር 'ቁጥር ጥራ' ይጫኑ" : "የተጠራው ቁጥር፦ $currentNumber", 
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                Text("የተጠሩ ቁጥሮች ብዛት፦ ${drawnNumbers.length}"),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: Text(
+                    currentNumber == null ? "ለመጀመር ዝግጁ ኖት?" : "የተጠራው ቁጥር፦ $currentNumber", 
+                    key: ValueKey(currentNumber),
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text("የተጠሩ ቁጥሮች ብዛት፦ ${drawnNumbers.length}", style: const TextStyle(color: Colors.white70)),
               ],
             ),
           ),
+          const SizedBox(height: 10),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(15), 
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 8, mainAxisSpacing: 8),
-                itemCount: 25, 
-                itemBuilder: (_, i) => Container(
-                  decoration: BoxDecoration(
-                    color: board[i].isMarked ? Colors.green : Colors.white, 
-                    border: Border.all(color: Colors.indigo), 
-                    borderRadius: BorderRadius.circular(8),
+              padding: const EdgeInsets.all(12), 
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5, 
+                    crossAxisSpacing: 8, 
+                    mainAxisSpacing: 8
                   ),
-                  child: Center(
-                    child: board[i].isFreeSpace 
-                      ? const Icon(Icons.star, color: Colors.orange, size: 30) 
-                      : Text("${board[i].number}", style: TextStyle(fontSize: 18, color: board[i].isMarked ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
-                  ),
-                )
+                  itemCount: 25, 
+                  itemBuilder: (_, i) {
+                    bool isSelected = board[i].isMarked;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.green.shade400 : Colors.white, 
+                        border: Border.all(color: isSelected ? Colors.green : Colors.deepPurple.shade100, width: 2), 
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          if (!isSelected) const BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                        ]
+                      ),
+                      child: Center(
+                        child: board[i].isFreeSpace 
+                          ? const Icon(Icons.star, color: Colors.orange, size: 35) 
+                          : Text(
+                              "${board[i].number}", 
+                              style: TextStyle(
+                                fontSize: 20, 
+                                color: isSelected ? Colors.white : Colors.black87, 
+                                fontWeight: FontWeight.bold
+                              )
+                            ),
+                      ),
+                    );
+                  },
+                ),
               ),
             )
           ),
-          Padding(
-            padding: const EdgeInsets.all(20), 
+          Container(
+            padding: const EdgeInsets.all(25),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+            ),
             child: Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: ElevatedButton.icon(
                     onPressed: hasWon ? null : _draw, 
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 15)),
-                    child: const Text("ቁጥር ጥራ", style: TextStyle(fontSize: 18))
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text("ቁጥር ጥራ", style: TextStyle(fontSize: 20)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
                   )
                 ),
                 const SizedBox(width: 15),
-                ElevatedButton(
+                IconButton(
                   onPressed: _generateBoard, 
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20)),
-                  child: const Text("እንደገና", style: TextStyle(fontSize: 18))
+                  icon: const Icon(Icons.refresh, color: Colors.redAccent),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.red.shade50,
+                    padding: const EdgeInsets.all(15),
+                  ),
                 ),
               ],
             )
