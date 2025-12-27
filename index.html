@@ -3,46 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arif Bingo</title>
+    <title>አሪፍ ቢንጎ - Arif Bingo</title>
     <style>
-        body { font-family: sans-serif; background-color: #1a237e; color: white; text-align: center; margin: 0; padding: 20px; overflow: hidden; }
-        h1 { color: #ffeb3b; font-size: 24px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 350px; margin: 0 auto; background: #303f9f; padding: 10px; border-radius: 10px; }
-        .cell { width: 100%; aspect-ratio: 1/1; background: white; color: #1a237e; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; }
-        .cell.marked { background: #f44336; color: white; }
-        .btn { margin-top: 20px; padding: 15px 30px; background: #ffeb3b; color: #1a237e; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; width: 80%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn:active { transform: scale(0.95); background: #fbc02d; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0d1117; color: white; text-align: center; margin: 0; padding: 10px; }
+        .header { background: #1f2937; padding: 15px; border-radius: 0 0 20px 20px; margin-bottom: 15px; border-bottom: 3px solid #facc15; }
+        .balance-box { font-size: 18px; color: #facc15; font-weight: bold; margin-bottom: 5px; }
+        
+        /* Menu Buttons */
+        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .menu-item { background: #374151; padding: 8px; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid #4b5563; }
+        .menu-item:active { background: #facc15; color: black; }
+
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 320px; margin: 0 auto; background: #1e3a8a; padding: 10px; border-radius: 10px; }
+        .cell { width: 100%; aspect-ratio: 1/1; background: white; color: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; border-radius: 5px; }
+        .cell.marked { background: #ef4444 !important; color: white !important; }
+        
+        .play-btn { margin-top: 15px; padding: 12px; background: #facc15; color: black; border: none; border-radius: 10px; font-weight: bold; width: 100%; font-size: 16px; }
     </style>
 </head>
 <body>
-    <h1>አሪፍ ቢንጎ</h1>
+
+    <div class="header">
+        <div class="balance-box">ቀሪ ሂሳብ: 0.00 ETB</div>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="alert('በቅርቡ ይከፈታል')">ለመመዝገብ</div>
+            <div class="menu-item" onclick="alert('ገንዘብ ለማስገባት')">ገንዘብ አስገባ</div>
+            <div class="menu-item" onclick="alert('ገንዘብ ለማውጣት')">ገንዘብ አውጣ</div>
+            <div class="menu-item" onclick="alert('እርዳታ')">እርዳታ</div>
+            <div class="menu-item" onclick="location.reload()">Refresh</div>
+            <div class="menu-item" onclick="alert('Account Settings')">መገለጫ</div>
+        </div>
+    </div>
+
     <div class="grid" id="bingoGrid"></div>
-    <button class="btn" onclick="generateNewBoard()">አዲስ ካርድ ቀይር</button>
+    <button class="play-btn" onclick="generateNewBoard()">አዲስ ካርድ ቀይር</button>
 
     <script>
         function generateNewBoard() {
             const grid = document.getElementById('bingoGrid');
             grid.innerHTML = '';
-            let numbers = [];
-            while(numbers.length < 25) {
+            let nums = [];
+            while(nums.length < 25) {
                 let r = Math.floor(Math.random() * 75) + 1;
-                if(numbers.indexOf(r) === -1) numbers.push(r);
+                if(!nums.includes(r)) nums.push(r);
             }
-            
-            numbers.forEach((num, index) => {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                if(index === 12) {
-                    cell.innerText = 'FREE';
-                    cell.classList.add('marked');
+            nums.forEach((n, i) => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                if(i === 12) {
+                    c.innerText = 'FREE';
+                    c.classList.add('marked');
                 } else {
-                    cell.innerText = num;
-                    cell.onclick = function() { this.classList.toggle('marked'); };
+                    c.innerText = n;
+                    c.onclick = function() { this.classList.toggle('marked'); };
                 }
-                grid.appendChild(cell);
+                grid.appendChild(c);
             });
         }
-        // ጌሙ ሲከፈት ወዲያውኑ ካርድ እንዲያመጣ
         generateNewBoard();
     </script>
 </body>
