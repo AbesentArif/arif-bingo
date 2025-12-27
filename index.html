@@ -3,110 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ARIF BINGO - Ultimate Edition</title>
+    <title>ARIF BINGO - Ultimate</title>
     <style>
-        :root { --gold: #facc15; --blue: #1e3a8a; --dark: #020617; --red: #ef4444; --glass: rgba(255, 255, 255, 0.1); }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        :root { --gold: #facc15; --blue: #1e40af; --dark: #020617; --red: #ef4444; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; overflow: hidden; height: 100vh; }
         
-        /* Logo Section */
-        .logo-container { padding: 25px 0 10px 0; text-align: center; }
-        .logo-text { font-size: 3rem; font-weight: 900; color: var(--gold); letter-spacing: 5px; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 4px 4px 0px #1e40af; font-family: 'Arial Black', sans-serif; }
+        /* Dashboard Page */
+        #dashboard { display: flex; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; }
+        .logo-main { font-size: 2.5rem; font-weight: 900; color: var(--gold); text-align: center; margin-bottom: 20px; text-shadow: 2px 2px #000; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid var(--gold); text-align: center; cursor: pointer; }
+        .play-btn { background: var(--gold); color: black; padding: 20px; border-radius: 50px; font-weight: bold; font-size: 1.5rem; margin-top: 30px; border: none; }
 
-        /* Registration Overlay */
-        #registration { position: fixed; inset: 0; background: var(--dark); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .reg-card { background: var(--card-bg); padding: 30px; border-radius: 25px; border: 2px solid var(--gold); width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(250, 204, 21, 0.2); }
-        input[type="tel"] { width: 100%; padding: 15px; margin: 20px 0; border-radius: 12px; border: none; font-size: 1.2rem; text-align: center; box-sizing: border-box; }
-        .btn-start { background: var(--gold); color: black; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; width: 100%; }
+        /* Game Page */
+        #gamePage { display: none; flex-direction: column; height: 100vh; padding: 10px; box-sizing: border-box; }
+        .game-top { display: flex; justify-content: space-around; align-items: center; background: linear-gradient(to right, #1e3a8a, #3b82f6); padding: 10px; border-radius: 15px; border: 2px solid var(--gold); height: 20%; }
+        .call-text { font-size: 1.2rem; color: var(--gold); }
+        .call-num { font-size: 4rem; font-weight: 900; line-height: 1; }
+        
+        /* Bingo Table Fixed for Mobile Screen */
+        .bingo-section { height: 70%; display: flex; flex-direction: column; justify-content: center; margin-top: 5px; }
+        .h-row { display: grid; grid-template-columns: repeat(5, 1fr); margin-bottom: 2px; }
+        .h-letter { font-size: 1.5rem; font-weight: 900; color: var(--gold); text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+        .cell { aspect-ratio: 1/1; background: white; color: var(--blue); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; cursor: pointer; }
+        .cell.marked { background: var(--red) !important; color: white !important; }
 
-        /* Number Caller Box */
-        .caller-outer { width: 90%; max-width: 360px; background: linear-gradient(145deg, #1e3a8a, #1e40af); padding: 20px; border-radius: 25px; border: 4px solid var(--gold); box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-bottom: 20px; position: relative; }
-        .caller-letter { font-size: 1.8rem; font-weight: bold; color: var(--gold); display: block; margin-bottom: -10px; }
-        .caller-number { font-size: 5rem; font-weight: 900; color: #fff; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
-        .progress-bar { height: 6px; background: var(--gold); width: 100%; position: absolute; bottom: 0; left: 0; border-radius: 0 0 20px 20px; transition: width 5s linear; }
-
-        /* Bingo Card Header */
-        .card-header { display: grid; grid-template-columns: repeat(5, 1fr); width: 340px; margin-bottom: 8px; }
-        .h-cell { font-size: 2rem; font-weight: 900; color: var(--gold); text-align: center; text-shadow: 2px 2px #000; }
-
-        /* Grid System */
-        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 340px; background: rgba(30, 58, 138, 0.5); padding: 12px; border-radius: 20px; backdrop-filter: blur(10px); }
-        .cell { aspect-ratio: 1/1; background: #fff; color: var(--blue); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 800; cursor: pointer; border-bottom: 4px solid #cbd5e1; transition: all 0.2s; }
-        .cell.marked { background: var(--red) !important; color: white !important; border-bottom: none; transform: scale(0.95); box-shadow: inset 0 5px 10px rgba(0,0,0,0.3); }
-
-        /* History & Payments */
-        .history { width: 90%; background: var(--glass); margin: 15px 0; padding: 10px; border-radius: 10px; font-size: 0.8rem; color: #cbd5e1; }
-        .footer-payment { width: 100%; background: #1e293b; padding: 20px; border-top: 4px solid var(--gold); margin-top: auto; }
-        .pay-number { font-size: 1.2rem; color: var(--gold); font-weight: bold; letter-spacing: 1px; }
-
-        /* Win Modal */
-        #winModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .win-box { background: var(--gold); color: #000; padding: 40px; border-radius: 30px; transform: scale(0); transition: 0.5s ease-out; }
+        /* Popups */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); padding: 30px; flex-direction: column; justify-content: center; z-index: 100; }
+        .modal-content { background: #1e293b; padding: 20px; border-radius: 20px; border: 2px solid var(--gold); text-align: center; }
     </style>
 </head>
 <body>
 
-    <div id="registration">
-        <div class="logo-text">ARIF BINGO</div>
-        <div class="reg-card">
-            <h2 style="margin-top:0">እንኳን ደህና መጡ!</h2>
-            <p>ለመጫወት ስልክ ቁጥርዎን ያስገቡ</p>
-            <input type="tel" id="phoneNumber" placeholder="09 / 07 ........">
-            <button class="btn-start" onclick="submitReg()">መዝገብና ጀምር</button>
+    <div id="dashboard">
+        <div class="logo-main">ARIF BINGO</div>
+        <div style="text-align:center; color:var(--gold); font-size:1.2rem;">ቀሪ ሂሳብ: <span id="balance">0.00</span> ETB</div>
+        
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showModal('reg')">👤 መመዝገቢያ</div>
+            <div class="menu-item" onclick="showModal('pay')">💰 ሂሳብ ሙላ</div>
+            <div class="menu-item" onclick="showModal('help')">❓ እርዳታ</div>
+            <div class="menu-item" onclick="showModal('with')">💸 ገንዘብ አውጣ</div>
         </div>
+
+        <button class="play-btn" onclick="tryPlay()">ተጫወት (PLAY)</button>
     </div>
 
-    <div id="winModal">
-        <div class="win-box" id="winBox">
-            <h1 style="font-size:3rem">🏆</h1>
-            <h2>እንኳን ደስ አለህ!</h2>
-            <p style="font-size:1.2rem">አንተ የዚህ ጨዋታ <b>አሸናፊ</b> ነህ!</p>
-            <button class="btn-start" style="background:#000; color:#fff" onclick="location.reload()">ድጋሚ ተጫወት</button>
+    <div id="gamePage">
+        <div class="game-top">
+            <div style="text-align:center">
+                <div class="call-text" id="lDisp">B</div>
+                <div class="call-num" id="nDisp">--</div>
+            </div>
+            <div style="font-size: 0.8rem; width: 50%; color: #cbd5e1;" id="hist">ታሪክ: </div>
         </div>
+
+        <div class="bingo-section">
+            <div class="h-row">
+                <div class="h-letter">B</div><div class="h-letter">I</div><div class="h-letter">N</div><div class="h-letter">G</div><div class="h-letter">O</div>
+            </div>
+            <div class="grid" id="bingoGrid"></div>
+        </div>
+        <button style="margin-top:5px; background:var(--red); color:white; border:none; padding:10px; border-radius:10px;" onclick="location.reload()">ውጣ</button>
     </div>
 
-    <div class="logo-container">
-        <div class="logo-text">ARIF BINGO</div>
-    </div>
-
-    <div class="caller-outer">
-        <span class="caller-letter" id="letterLabel">ተዘጋጁ...</span>
-        <div class="caller-number" id="numberLabel">--</div>
-        <div class="progress-bar" id="progress"></div>
-    </div>
-
-    <div class="history" id="historyText">የወጡ ቁጥሮች: </div>
-
-    <div class="card-header">
-        <div class="h-cell">B</div><div class="h-cell">I</div><div class="h-cell">N</div><div class="h-cell">G</div><div class="h-cell">O</div>
-    </div>
-    <div class="bingo-grid" id="grid"></div>
-
-    <div class="footer-payment">
-        <div>የመክፈያ ቁጥር (ቴሌብር/CBE):</div>
-        <div class="pay-number">0906420377</div>
-        <div style="font-size: 0.8rem; margin-top:10px; opacity:0.7;">10 ጊዜ ለተጫወተ 1 በነጻ | ማረጋገጫ ለ @Admin ይላኩ</div>
+    <div id="modal" class="modal">
+        <div class="modal-content" id="mContent"></div>
+        <button style="margin-top:15px; padding:10px;" onclick="closeModal()">ዝጋ</button>
     </div>
 
     <script>
-        let calledNumbers = [];
-        let markedIndices = new Set([12]); // FREE space is pre-marked
+        let balance = 0;
+        let calledNums = [];
+        let isRegistered = false;
 
-        function submitReg() {
-            const phone = document.getElementById('phoneNumber').value;
-            if(phone.length >= 10) {
-                document.getElementById('registration').style.display = 'none';
-                initGame();
-            } else { alert("እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ!"); }
+        function showModal(type) {
+            const mc = document.getElementById('mContent');
+            document.getElementById('modal').style.display = 'flex';
+            if(type === 'pay') {
+                mc.innerHTML = `<h3>ሂሳብ ለመሙላት</h3>
+                <p>መክፈያ ቁጥር: <b style="color:var(--gold)">0906420377</b></p>
+                <button onclick="balance+=100; closeModal(); updateBal()">በቴሌብር ክፈያለሁ (ሙከራ)</button><br><br>
+                <button onclick="balance+=100; closeModal(); updateBal()">በሲቢኢ ብር ክፈያለሁ (ሙከራ)</button>`;
+            } else if(type === 'reg') {
+                mc.innerHTML = `<h3>መመዝገቢያ</h3>
+                <input type="tel" id="p" placeholder="ስልክ ቁጥር" style="padding:10px; width:80%"><br><br>
+                <button onclick="isRegistered=true; closeModal()">መዝግብ</button>`;
+            } else if(type === 'help') {
+                mc.innerHTML = `<h3>እርዳታ</h3><p>10 ብር ከፍለው ይጫወቱ። 10 ጊዜ ሲጫወቱ 1 ነጻ ያገኛሉ።</p>`;
+            }
         }
 
-        function initGame() {
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function updateBal() { document.getElementById('balance').innerText = balance.toFixed(2); }
+
+        function tryPlay() {
+            if(!isRegistered) { alert("እባክዎ መጀመሪያ ይመዝገቡ!"); return; }
+            if(balance < 10) { alert("በቂ ሂሳብ የሎትም! እባክዎ ሂሳብ ይሙሉ (10 ETB)"); return; }
+            balance -= 10;
+            updateBal();
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'flex';
+            startGame();
+        }
+
+        function startGame() {
             createCard();
-            startCalling();
+            setInterval(() => {
+                let n = Math.floor(Math.random() * 75) + 1;
+                while(calledNums.includes(n)) n = Math.floor(Math.random() * 75) + 1;
+                calledNums.push(n);
+                let l = "BINGO"[Math.floor((n-1)/15)];
+                document.getElementById('lDisp').innerText = l;
+                document.getElementById('nDisp').innerText = n;
+                document.getElementById('hist').innerText = "ታሪክ: " + l + "-" + n + ", " + document.getElementById('hist').innerText.replace("ታሪክ: ", "").substring(0, 30);
+            }, 5000);
         }
 
         function createCard() {
-            const gridEl = document.getElementById('grid');
-            gridEl.innerHTML = '';
+            const g = document.getElementById('bingoGrid');
+            g.innerHTML = '';
             let cols = [[],[],[],[],[]];
             for(let i=0; i<5; i++) {
                 while(cols[i].length < 5) {
@@ -114,70 +131,19 @@
                     if(!cols[i].includes(r)) cols[i].push(r);
                 }
             }
-            let index = 0;
             for(let r=0; r<5; r++) {
                 for(let c=0; c<5; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     let val = (r===2 && c===2) ? 'FREE' : cols[c][r];
-                    let currentIdx = index;
                     cell.innerText = val;
-                    if(val === 'FREE') cell.classList.add('marked');
-                    
+                    if(val==='FREE') cell.classList.add('marked');
                     cell.onclick = function() {
-                        if(val === 'FREE') return;
-                        if(calledNumbers.includes(val)) {
-                            if(!this.classList.contains('marked')) {
-                                this.classList.add('marked');
-                                markedIndices.add(currentIdx);
-                                checkWinner();
-                            }
-                        } else {
-                            alert("ይህ ቁጥር ገና አልወጣም! እባክዎ እስኪወጣ ይጠብቁ።");
-                        }
+                        if(val==='FREE' || calledNums.includes(parseInt(val))) this.classList.add('marked');
+                        else alert("ይህ ቁጥር ገና አልወጣም!");
                     };
-                    gridEl.appendChild(cell);
-                    index++;
+                    g.appendChild(cell);
                 }
-            }
-        }
-
-        function startCalling() {
-            const call = () => {
-                if(calledNumbers.length >= 75) { calledNumbers = []; }
-                let n;
-                do { n = Math.floor(Math.random() * 75) + 1; } while(calledNumbers.includes(n));
-                calledNumbers.push(n);
-                
-                let letters = ['B','I','N','G','O'];
-                let l = letters[Math.floor((n-1)/15)];
-                
-                document.getElementById('letterLabel').innerText = l;
-                document.getElementById('numberLabel').innerText = n;
-                
-                let hist = document.getElementById('historyText');
-                hist.innerText = "የወጡ ቁጥሮች: " + l + "-" + n + ", " + hist.innerText.replace("የወጡ ቁጥሮች: ", "").substring(0, 40);
-
-                // Progress animation
-                let bar = document.getElementById('progress');
-                bar.style.transition = 'none';
-                bar.style.width = '100%';
-                setTimeout(() => {
-                    bar.style.transition = 'width 5s linear';
-                    bar.style.width = '0%';
-                }, 50);
-            };
-            call();
-            setInterval(call, 5000);
-        }
-
-        function checkWinner() {
-            // Simple full card win logic
-            if(markedIndices.size === 25) {
-                const modal = document.getElementById('winModal');
-                const box = document.getElementById('winBox');
-                modal.style.display = 'flex';
-                setTimeout(() => { box.style.transform = 'scale(1)'; }, 100);
             }
         }
     </script>
