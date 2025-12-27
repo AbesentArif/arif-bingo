@@ -14,35 +14,39 @@
         .page { display: none; padding: 10px; flex-direction: column; align-items: center; min-height: 100vh; }
         .active-page { display: flex; }
         
-        .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); width: 92%; border-radius: 20px; padding: 25px 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; text-align: center; }
-        .balance-box { font-size: 36px; font-weight: 900; color: var(--gold); margin: 5px 0; }
+        .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); width: 92%; border-radius: 20px; padding: 25px 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; text-align: center; position: relative; }
         
-        /* የተሻሻለ የቁጥር ጥሪ ሳጥን */
+        /* የቀሪ ሂሳብ አይከን */
+        .wallet-icon { font-size: 24px; cursor: pointer; color: var(--gold); display: inline-block; margin-bottom: 5px; }
+        .balance-box { font-size: 34px; font-weight: 900; color: var(--gold); margin: 0; }
+
+        /* የቁጥር ጥሪ ሳጥን */
+        .calling-area { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 15px 0; }
         .calling-card { 
             background: linear-gradient(135deg, #FFD700, #FFA000);
             width: 100px; height: 100px; border-radius: 20px; display: flex; 
             flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); margin: 10px 0;
-            border: 3px solid #fff;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); z-index: 2; border: 3px solid #fff;
         }
-        .calling-letter { font-size: 24px; font-weight: 900; color: #5d4037; margin-bottom: -5px; }
-        .calling-number { font-size: 52px; font-weight: 900; color: #3e2723; }
+        .calling-letter { font-size: 22px; font-weight: 900; color: #5d4037; }
+        .calling-number { font-size: 50px; font-weight: 900; color: #3e2723; }
 
-        /* ትልቅና ጎልቶ የሚታይ ሰንጠረዥ */
-        .bingo-container { background: rgba(0,0,0,0.5); padding: 8px; border-radius: 15px; border: 2px solid var(--gold); width: 96%; }
+        /* ዙሪያውን ለ10 ሰከንድ የሚታዩ ቁጥሮች */
+        .temporary-number {
+            position: absolute; background: var(--neon-blue); color: white;
+            width: 35px; height: 35px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 14px; font-weight: bold;
+            animation: fadeOut 10s forwards; z-index: 1;
+        }
+        @keyframes fadeOut { 0% { opacity: 1; transform: scale(1); } 90% { opacity: 1; } 100% { opacity: 0; transform: scale(0); } }
+
+        /* ቢንጎ ሰንጠረዥ */
+        .bingo-container { background: rgba(0,0,0,0.5); padding: 8px; border-radius: 15px; border: 2px solid var(--gold); width: 96%; margin-top: 10px; }
         .bingo-header { display: grid; grid-template-columns: repeat(5, 1fr); margin-bottom: 8px; }
         .header-letter { text-align: center; font-weight: 900; font-size: 28px; color: var(--gold); }
-        
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%; }
-        .cell { 
-            aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; font-size: 1.5rem; background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2); color: #fff;
-        }
-        .cell.active { 
-            background: radial-gradient(circle, #00d2ff, #3a7bd5); 
-            box-shadow: 0 0 15px var(--neon-blue); border: none;
-        }
+        .cell { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.6rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+        .cell.active { background: radial-gradient(circle, #00d2ff, #3a7bd5); box-shadow: 0 0 15px var(--neon-blue); border: none; }
         .cell.free { background: var(--gold); color: #000; font-size: 0.9rem; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin: 8px 0; }
@@ -52,27 +56,29 @@
 
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: #1e293b; width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--gold); }
-        input { width: 90%; padding: 14px; margin: 10px 0; border-radius: 10px; background: #0f172a; color: white; border: 1px solid #334155; }
+        input { width: 90%; padding: 14px; margin: 8px 0; border-radius: 10px; background: #0f172a; color: white; border: 1px solid #334155; }
     </style>
 </head>
 <body>
 
     <div id="registrationPage" class="page">
-        <h2 id="txt-reg-title"></h2>
+        <h2 id="txt-reg-title">ምዝገባ / Register</h2>
         <div class="card">
-            <p id="txt-reg-desc"></p>
+            <p id="txt-reg-desc">ስምዎንና ስልክዎን ያስገቡ</p>
+            <input type="text" id="nameInput" placeholder="ሙሉ ስም">
             <input type="tel" id="phoneInput" placeholder="09...">
-            <button class="btn btn-primary" onclick="registerUser()" id="btn-register"></button>
+            <button class="btn btn-primary" onclick="registerUser()">መዝግብ / Register</button>
         </div>
     </div>
 
     <div id="dashboardPage" class="page">
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2 style="color:var(--gold); margin:0;">BINGO GOLD</h2>
-            <button class="btn-outline" style="width: auto; padding: 6px 15px; font-size: 14px; border-radius: 20px;" onclick="toggleLang()">English/አማርኛ</button>
+            <h2 style="color:var(--gold); margin:0;" id="welcomeName">BINGO GOLD</h2>
+            <button class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 14px; border-radius: 20px;" onclick="toggleLang()">EN/አማ</button>
         </div>
         
         <div class="card">
+            <div class="wallet-icon" onclick="showBalanceAlert()">💰</div>
             <div id="txt-balance-label" style="opacity: 0.8; font-size: 14px;"></div>
             <div class="balance-box"><span id="userBalance">0.00</span> ETB</div>
             
@@ -89,10 +95,12 @@
             <div id="statusBadge" style="color: var(--gold); font-weight: bold; font-size: 14px;"></div>
         </div>
 
-        <div class="calling-card">
-            <div class="calling-letter" id="callLetter">B</div>
-            <div class="calling-number" id="callNum">--</div>
-        </div>
+        <div class="calling-area" id="callingArea">
+            <div class="calling-card">
+                <div class="calling-letter" id="callLetter">B</div>
+                <div class="calling-number" id="callNum">--</div>
+            </div>
+            </div>
 
         <div class="bingo-container">
             <div class="bingo-header">
@@ -102,8 +110,6 @@
             </div>
             <div class="grid" id="bingoGrid"></div>
         </div>
-
-        <div style="display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 10px; opacity: 0.5;" id="recentNumbers"></div>
     </div>
 
     <div id="depositModal" class="overlay">
@@ -124,7 +130,7 @@
             <h3 id="promptTitle"></h3>
             <input type="tel" id="promptPhone" placeholder="09...">
             <input type="number" id="promptAmount" placeholder="ETB">
-            <button class="btn btn-primary" onclick="submitRequest()" id="btn-submit"></button>
+            <button class="btn btn-primary" onclick="submitRequest()" id="btn-submit">ላክ / Send</button>
             <button class="btn btn-outline" onclick="closeModal('promptModal')" id="btn-cancel"></button>
         </div>
     </div>
@@ -139,35 +145,42 @@
 
         const langData = {
             am: {
-                regTitle: "እንኳን ደህና መጡ!", regDesc: "ለመቀጠል እባክዎ ስልክ ቁጥርዎን ያስገቡ",
                 balance: "ቀሪ ሂሳብ", deposit: "ብር አስገባ", play: "ጨዋታ ጀምር", withdraw: "ብር አውጣ", 
-                rules: "የጨዋታ ደንብ", back: "⬅️ ተመለስ", 
-                screenshot: "ማሳሰቢያ፡ ክፍያውን እንደፈጸሙ ከኢቲዮ ቴሌኮም ወይም ከባንኩ የሚላክሎትን የክፍያ ማረጋገጫ መልእክት ስክሪንሹት አድርገው ይላኩ።",
-                viewing: "👀 በመመልከት ላይ", playing: "🎮 በመጫወት ላይ", payTitle: "የመክፈያ ዘዴ ይምረጡ", close: "ዝጋ", submit: "ጥያቄ ላክ", cancel: "ሰርዝ",
-                rulesText: "1. በአንድ ጊዜ መጫወት የሚቻለው በ 10 ብር ነው።\n2. በአግድም፣ ቁልቁል ወይም በሰያፍ 5 መሙላት።\n3. አራቱን ማዕዘኖች መሙላት።\n4. 10 ጊዜ ሲጫወቱ 1 ነጻ ያገኛሉ።",
+                rules: "የጨዋታ ደንብ", back: "⬅️ ተመለስ", screenshot: "ማሳሰቢያ፡ ክፍያውን እንደፈጸሙ ከኢቲዮ ቴሌኮም ወይም ከባንኩ የሚላክሎትን የስክሪንሹት ይላኩ።",
+                viewing: "👀 በመመልከት ላይ", playing: "🎮 በመጫወት ላይ", payTitle: "የመክፈያ ዘዴ ይምረጡ", close: "ዝጋ", cancel: "ሰርዝ",
+                rulesText: "1. የአንድ ጨዋታ ዋጋ 10 ብር ነው።\n2. 5 ቁጥሮች በመስመር ሲሞሉ ቢንጎ ይሆናል።\n3. 10 ጊዜ ሲጫወቱ 1 ነጻ ያገኛሉ።",
                 teleMsg: "የቴሌብር መቀበያ ቁጥር፡", cbeMsg: "የሲቢኢ ብር መቀበያ ቁጥር፡"
             },
             en: {
-                regTitle: "Welcome!", regDesc: "Enter your phone number to continue",
                 balance: "Balance", deposit: "Deposit", play: "Start Game", withdraw: "Withdraw", 
-                rules: "Rules", back: "⬅️ Back", 
-                screenshot: "Note: After payment, send a screenshot of the confirmation message from ethio telecom or your bank.",
-                viewing: "👀 Spectating", playing: "🎮 Playing", payTitle: "Choose Payment Method", close: "Close", submit: "Submit", cancel: "Cancel",
-                rulesText: "1. Play costs 10 ETB per game.\n2. Fill 5 in Row, Col or Diagonal.\n3. Four corners win.\n4. Get 1 free game for every 10 games.",
-                teleMsg: "telebirr Receiver Number:", cbeMsg: "CBE Birr Receiver Number:"
+                rules: "Rules", back: "⬅️ Back", screenshot: "Note: Send the screenshot of the confirmation message after payment.",
+                viewing: "👀 Spectating", playing: "🎮 Playing", payTitle: "Choose Payment Method", close: "Close", cancel: "Cancel",
+                rulesText: "1. Each game costs 10 ETB.\n2. Complete 5 in a row for Bingo.\n3. Get 1 free game for every 10 games.",
+                teleMsg: "telebirr Receiver:", cbeMsg: "CBE Birr Receiver:"
             }
         };
 
         window.onload = () => {
             const savedPhone = localStorage.getItem('user_phone');
-            if (!savedPhone) { showPage('registrationPage'); } 
-            else { showPage('dashboardPage'); }
+            if (!savedPhone) { 
+                showPage('registrationPage'); 
+            } else { 
+                document.getElementById('welcomeName').innerText = localStorage.getItem('user_name') || "BINGO GOLD";
+                showPage('dashboardPage'); 
+            }
             updateUI();
         };
 
         function registerUser() {
+            const name = document.getElementById('nameInput').value;
             const ph = document.getElementById('phoneInput').value;
-            if(ph.length >= 10) { localStorage.setItem('user_phone', ph); showPage('dashboardPage'); }
+            if(name && ph.length >= 10) { 
+                localStorage.setItem('user_name', name);
+                localStorage.setItem('user_phone', ph); 
+                location.reload();
+            } else {
+                tg.showAlert("እባክዎ ስምዎንና ስልክዎን በትክክል ያስገቡ!");
+            }
         }
 
         function toggleLang() {
@@ -177,9 +190,6 @@
 
         function updateUI() {
             const d = langData[currentLang];
-            document.getElementById('txt-reg-title').innerText = d.regTitle;
-            document.getElementById('txt-reg-desc').innerText = d.regDesc;
-            document.getElementById('btn-register').innerText = d.regTitle;
             document.getElementById('txt-balance-label').innerText = d.balance;
             document.getElementById('btn-deposit').innerText = d.deposit;
             document.getElementById('btn-play').innerText = d.play;
@@ -189,8 +199,12 @@
             document.getElementById('txt-screenshot-msg').innerText = d.screenshot;
             document.getElementById('txt-dep-title').innerText = d.payTitle;
             document.getElementById('btn-close').innerText = d.close;
-            document.getElementById('btn-submit').innerText = d.submit;
             document.getElementById('btn-cancel').innerText = d.cancel;
+        }
+
+        function showBalanceAlert() {
+            const d = langData[currentLang];
+            tg.showAlert(`${d.balance}: ${balance.toFixed(2)} ETB`);
         }
 
         function showPage(id) {
@@ -212,12 +226,35 @@
             document.getElementById('promptModal').style.display = 'flex';
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function submitRequest() { tg.showAlert(currentLang === 'am' ? "ጥያቄዎ ተልኳል!" : "Request Sent!"); closeModal('promptModal'); }
+        function submitRequest() { tg.showAlert("ተልኳል! / Sent!"); closeModal('promptModal'); }
 
         function goToGame() {
             showPage('gamePage');
             document.getElementById('statusBadge').innerText = balance < 10 ? langData[currentLang].viewing : langData[currentLang].playing;
             initGrid();
+        }
+
+        // ለሙከራ ያህል ቁጥር ሲወጣ ዙሪያውን እንዲታይ የሚያደርግ (ይህ በቦቱ ነው የሚቆጣጠረው)
+        function mockCallNumber(n) {
+            calledNumbers.push(n);
+            let letter = n <= 15 ? 'B' : n <= 30 ? 'I' : n <= 45 ? 'N' : n <= 60 ? 'G' : 'O';
+            document.getElementById('callLetter').innerText = letter;
+            document.getElementById('callNum').innerText = n;
+            
+            // ለ10 ሰከንድ የሚቆይ ቁጥር መፍጠር
+            const area = document.getElementById('callingArea');
+            const temp = document.createElement('div');
+            temp.className = 'temporary-number';
+            temp.innerText = n;
+            
+            // በዘፈቀደ ቦታ ማስቀመጥ (ከሳጥኑ ዙሪያ)
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 60;
+            temp.style.left = `calc(50% - 17px + ${Math.cos(angle) * radius}px)`;
+            temp.style.top = `calc(50% - 17px + ${Math.sin(angle) * radius}px)`;
+            
+            area.appendChild(temp);
+            setTimeout(() => temp.remove(), 10000); // ከ10 ሰከንድ በኋላ መጥፋት
         }
 
         function initGrid() {
@@ -231,9 +268,8 @@
                 else {
                     cell.innerText = n;
                     cell.onclick = () => {
-                        if (balance < 10) { tg.showAlert(currentLang === 'am' ? "ለመጫወት ሂሳብዎን ይሙሉ!" : "Recharge to play!"); return; }
+                        if (balance < 10) { tg.showAlert(langData[currentLang].play + "!"); return; }
                         if (calledNumbers.includes(n)) cell.classList.toggle('active');
-                        else tg.showAlert(currentLang === 'am' ? "ቁጥሩ አልወጣም!" : "Not called!");
                     };
                 }
                 grid.appendChild(cell);
