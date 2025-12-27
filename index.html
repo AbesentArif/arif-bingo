@@ -12,28 +12,14 @@
         .active-page { display: flex; }
         
         .brand-title { font-size: 3.5rem; font-weight: 900; background: linear-gradient(#FFD700, #FFA000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 40px; margin-bottom: 5px; font-style: italic; }
-
         .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); width: 90%; border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; text-align: center; }
         
-        /* ቁጥሩ የሚወጣበት ሳጥን */
         .calling-area { position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; margin: 15px 0; }
-        .calling-card { 
-            background: linear-gradient(135deg, #FFD700, #FFA000); 
-            width: 120px; height: 120px; border-radius: 25px; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; 
-            box-shadow: 0 0 30px var(--gold); z-index: 5; border: 4px solid #fff; 
-        }
-        /* ፊደልና ቁጥር እኩል መጠን */
+        .calling-card { background: linear-gradient(135deg, #FFD700, #FFA000); width: 120px; height: 120px; border-radius: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 30px var(--gold); z-index: 5; border: 4px solid #fff; }
         .calling-letter, .calling-number { font-size: 45px; font-weight: 900; color: #3e2723; line-height: 1; }
 
-        /* በዙሪያው የሚቆዩ ቁጥሮች - ሊነበብ በሚችል መጠን */
-        .temp-ball { 
-            position: absolute; background: var(--neon-blue); color: white; 
-            width: 40px; height: 40px; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; font-size: 18px; 
-            font-weight: bold; animation: fadeAway 10s forwards; border: 2px solid white; z-index: 1; 
-        }
-        @keyframes fadeAway { 0% { opacity: 1; transform: scale(1); } 90% { opacity: 1; } 100% { opacity: 0; transform: scale(0.5); } }
+        .temp-ball { position: absolute; background: var(--neon-blue); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; animation: fadeAway 10s forwards; border: 2px solid white; z-index: 1; }
+        @keyframes fadeAway { 0% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; transform: scale(0.5); } }
 
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 100%; max-width: 350px; }
         .cell { aspect-ratio: 1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.6rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: #fff; }
@@ -52,16 +38,16 @@
     <div id="welcomePage" class="page">
         <div class="brand-title">Arif Bingo</div>
         <div class="card">
-            <h2 id="txt-welcome">እንኳን ደህና መጡ!</h2>
-            <button class="btn btn-primary" onclick="showAuth('reg')">ተመዝገብ / Sign Up</button>
-            <button class="btn btn-outline" onclick="showAuth('login')">ግባ / Login</button>
+            <h2>እንኳን ደህና መጡ!</h2>
+            <button class="btn btn-primary" onclick="showAuth('reg')">ተመዝገብ</button>
+            <button class="btn btn-outline" onclick="showAuth('login')">ግባ</button>
         </div>
     </div>
 
     <div id="dashboardPage" class="page">
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-            <span id="userLabel" style="font-weight: bold; color: var(--gold);">User</span>
-            <button class="btn-outline" style="width: auto; padding: 5px 12px; font-size: 12px; border-radius: 20px;" onclick="toggleLang()">EN/አማ</button>
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <span id="userLabel" style="font-weight: bold; color: var(--gold);">ተጫዋች</span>
+            <div style="color:white; font-size:12px;">አሪፍ ቢንጎ</div>
         </div>
         <div class="card" style="margin-top: 30px;">
             <div style="font-size: 45px; cursor: pointer;" onclick="toggleBalance()">💰</div>
@@ -72,7 +58,7 @@
             <button class="btn btn-primary" onclick="goToGame()">ጨዋታ ጀምር</button>
             <button class="btn btn-outline" onclick="openWithdrawModal()">ብር አውጣ</button>
             <button class="btn btn-outline" onclick="showRules()">የጨዋታ ደንብ</button>
-            <button style="background:none; border:none; color:gray; margin-top:15px;" onclick="logout()">Logout</button>
+            <button style="background:none; border:none; color:gray; margin-top:15px; text-decoration: underline;" onclick="logout()">ውጣ (Logout)</button>
         </div>
     </div>
 
@@ -100,12 +86,25 @@
         </div>
     </div>
 
+    <div id="depositModal" class="overlay">
+        <div class="card" style="background:#1e293b;">
+            <h3>የመክፈያ ዘዴ ይምረጡ</h3>
+            <button class="btn btn-outline" style="background:#fff; color:#000" onclick="showPayInfo('telebirr')">telebirr</button>
+            <button class="btn btn-outline" style="background:#fff; color:#000" onclick="showPayInfo('cbe')">CBE Birr</button>
+            <div id="payDetails" style="display:none; margin-top:15px; text-align: left;">
+                <p id="payMsg" style="color:var(--gold); font-weight:bold; font-size:18px;"></p>
+                <p style="color:#ff5252; font-size:13px">ማሳሰቢያ፡ ክፍያውን እንደፈጸሙ ከኢቲዮ ቴሌኮም ወይም ከባንኩ የሚላክሎትን መልእክት ስክሪንሹት (Screenshot) አድርገው በቦቱ በኩል ይላኩ።</p>
+            </div>
+            <button class="btn btn-primary" style="margin-top:10px" onclick="closeOverlay('depositModal')">ዝጋ</button>
+        </div>
+    </div>
+
     <div id="withdrawModal" class="overlay">
         <div class="card" style="background:#1e293b;">
-            <h3>ብር አውጣ</h3>
-            <input type="tel" id="wdPhone" placeholder="ስልክ ቁጥር">
+            <h3>ብር ለማውጣት መረጃዎን ያስገቡ</h3>
+            <input type="tel" id="wdPhone" placeholder="የሚላክበት ስልክ ቁጥር">
             <input type="password" id="wdPass" placeholder="ፓስወርድ">
-            <input type="number" id="wdAmount" placeholder="መጠን (ETB)">
+            <input type="number" id="wdAmount" placeholder="የገንዘብ መጠን">
             <button class="btn btn-primary" onclick="submitWithdraw()">ጥያቄ ላክ</button>
             <button class="btn-outline" style="border:none" onclick="closeOverlay('withdrawModal')">ሰርዝ</button>
         </div>
@@ -113,7 +112,6 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        let currentLang = 'am';
         let balance = 0.00;
         let calledNumbers = [];
         let authMode = 'reg';
@@ -139,7 +137,7 @@
         function processAuth() {
             const ph = document.getElementById('authPhone').value;
             const pass = document.getElementById('authPass').value;
-            if (ph.length < 10 || pass.length < 4) { tg.showAlert("በትክክል ያስገቡ!"); return; }
+            if (ph.length < 10 || pass.length < 4) { tg.showAlert("እባክዎ በትክክል ያስገቡ!"); return; }
 
             const savedUser = localStorage.getItem('u_phone_' + ph);
 
@@ -149,22 +147,21 @@
                 } else {
                     localStorage.setItem('u_phone_' + ph, ph);
                     localStorage.setItem('u_pass_' + ph, pass);
-                    completeLogin(ph, pass);
+                    localStorage.setItem('isLoggedIn', true);
+                    localStorage.setItem('u_phone', ph);
+                    localStorage.setItem('u_pass', pass);
+                    location.reload();
                 }
             } else {
                 if (savedUser && localStorage.getItem('u_pass_' + ph) === pass) {
-                    completeLogin(ph, pass);
+                    localStorage.setItem('isLoggedIn', true);
+                    localStorage.setItem('u_phone', ph);
+                    localStorage.setItem('u_pass', pass);
+                    location.reload();
                 } else {
                     tg.showAlert("የተሳሳተ ስልክ ወይም ፓስወርድ! ወይም ገና አልተመዘገቡም።");
                 }
             }
-        }
-
-        function completeLogin(ph, pass) {
-            localStorage.setItem('isLoggedIn', true);
-            localStorage.setItem('u_phone', ph);
-            localStorage.setItem('u_pass', pass);
-            location.reload();
         }
 
         function mockCaller() {
@@ -191,24 +188,44 @@
             setTimeout(() => ball.remove(), 10000);
         }
 
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id).classList.add('active-page');
-        }
-
         function toggleBalance() {
             const box = document.getElementById('balanceDisplay');
             box.style.display = box.style.display === 'none' ? 'block' : 'none';
         }
 
-        function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
-        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-        function openWithdrawModal() { document.getElementById('withdrawModal').style.display = 'flex'; }
-        function exitGame() { showPage('dashboardPage'); }
-        
+        function openDeposit() { 
+            document.getElementById('payDetails').style.display = 'none';
+            document.getElementById('depositModal').style.display = 'flex'; 
+        }
+
+        function showPayInfo(type) {
+            document.getElementById('payDetails').style.display = 'block';
+            document.getElementById('payMsg').innerText = type === 'telebirr' ? "የቴሌብር ቁጥር፡ 0906420377" : "የሲቢኢ ብር ቁጥር፡ 0906420377";
+        }
+
+        function submitWithdraw() {
+            const pass = document.getElementById('wdPass').value;
+            if (pass === localStorage.getItem('u_pass')) {
+                tg.showAlert("ጥያቄዎ ተልኳል! በቅርቡ ይስተካከላል።");
+                closeOverlay('withdrawModal');
+            } else {
+                tg.showAlert("የተሳሳተ ፓስወርድ!");
+            }
+        }
+
+        function showRules() {
+            const rules = "የጨዋታ ደንቦች፡\n\n1. አዲስ ተጨዋች ሲመዘገብ የመጀመሪያውን ጨዋታ በነጻ ይጫወታል።\n2. በአንድ ጊዜ መጫወት የሚቻለው በ 10 ብር ነው።\n3. 10 ጊዜ የተጫወተ ሰው በ 11ኛው ጨዋታ በነጻ ይጫወታል።\n4. 5 ቁጥሮች በመስመር (በአግድም፣ በቁመት ወይም በሰያፍ) ሲሞሉ ቢንጎ ይሆናል።";
+            tg.showAlert(rules);
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+        }
+
         function goToGame() {
             showPage('gamePage');
-            document.getElementById('statusBadge').innerText = (isFirstGame) ? "🆓 Free" : (balance < 10 ? "👀 Spectating" : "🎮 Playing");
+            document.getElementById('statusBadge').innerText = (isFirstGame) ? "🆓 ነጻ ጨዋታ" : (balance < 10 ? "👀 በመመልከት ላይ" : "🎮 በመጫወት ላይ");
             initGrid();
         }
 
@@ -219,22 +236,22 @@
             nums.forEach((n, i) => {
                 const cell = document.createElement('div');
                 cell.className = "cell";
-                if(i === 12) { cell.innerText = "FREE"; cell.classList.add('free', 'active'); }
+                if(i === 12) { cell.innerText = "ነጻ"; cell.classList.add('free', 'active'); }
                 else {
                     cell.innerText = n;
                     cell.onclick = () => {
-                        if (!isFirstGame && balance < 10) { tg.showAlert("ሂሳብዎን ይሙሉ!"); return; }
+                        if (!isFirstGame && balance < 10) { tg.showAlert("እባክዎ መጀመሪያ ሂሳብዎን ይሙሉ!"); return; }
                         if(calledNumbers.includes(n)) cell.classList.toggle('active');
                     };
                 }
                 grid.appendChild(cell);
             });
         }
-        
-        function showRules() {
-            const rules = "1. የመጀመሪያው ጨዋታ ነጻ ነው።\n2. 10 ጊዜ ሲጫወቱ 11ኛው ነጻ ነው።\n3. ሂሳብ የሌለው ሰው ማየት ብቻ ይችላል።";
-            tg.showAlert(rules);
-        }
+
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+        function openWithdrawModal() { document.getElementById('withdrawModal').style.display = 'flex'; }
+        function exitGame() { showPage('dashboardPage'); }
+        function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
     </script>
 </body>
 </html>
