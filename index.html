@@ -1,210 +1,232 @@
-import 'package:flutter/material.dart';
-import 'dart:math';
-import 'dart:html' as html; // ለ LocalStorage መጠቀምያ
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ቢንጎ በቴሌግራም</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-button-color: #2481cc;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #999999;
+        }
 
-void main() {
-  runApp(const BingoApp());
-}
+        body {
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color, #f0f2f5);
+            color: var(--tg-theme-text-color, #000);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-user-select: none;
+        }
 
-class BingoApp extends StatelessWidget {
-  const BingoApp({super.key});
+        .header {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const BingoGame(),
-    );
-  }
-}
+        .user-info { font-weight: bold; font-size: 1.1rem; }
 
-class BingoGame extends StatefulWidget {
-  const BingoGame({super.key});
+        .rules-btn {
+            background: none;
+            border: 1px solid var(--tg-theme-button-color);
+            color: var(--tg-theme-button-color);
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
 
-  @override
-  _BingoGameState createState() => _BingoGameState();
-}
+        #status {
+            height: 30px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
 
-class _BingoGameState extends State<BingoGame> {
-  List<int> board = [];
-  List<bool> selected = List.generate(25, (index) => false);
-  bool hasWon = false;
-  String? userName;
-  final TextEditingController _nameController = TextEditingController();
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            width: 95vw;
+            max-width: 400px;
+            aspect-ratio: 1;
+        }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadUser(); // የተቀመጠ ስም ካለ መፈተሽ
-    _generateBoard();
-  }
+        .cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--tg-theme-bg-color);
+            border: 2px solid var(--tg-theme-button-color);
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
 
-  // ስምን ከ LocalStorage መጫኛ
-  void _loadUser() {
-    final savedName = html.window.localStorage['bingo_user_name'];
-    if (savedName != null && savedName.isNotEmpty) {
-      setState(() {
-        userName = savedName;
-      });
-    }
-  }
+        .cell:active { transform: scale(0.95); }
 
-  // ስምን በ LocalStorage ማስቀመጫ
-  void _saveUser(String name) {
-    if (name.isNotEmpty) {
-      html.window.localStorage['bingo_user_name'] = name;
-      setState(() {
-        userName = name;
-      });
-    }
-  }
+        .cell.selected {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
 
-  void _generateBoard() {
-    List<int> numbers = List.generate(75, (index) => index + 1);
-    numbers.shuffle();
-    setState(() {
-      board = numbers.take(25).toList();
-      selected = List.generate(25, (index) => false);
-      selected[12] = true; // መካከለኛዋ ነጻ (Free) ነች
-      hasWon = false;
-    });
-  }
+        .cell.free {
+            background: #4caf50;
+            color: white;
+            border-color: #2e7d32;
+        }
 
-  void _toggleCell(int index) {
-    if (hasWon) return;
-    setState(() {
-      selected[index] = !selected[index];
-      _checkWin();
-    });
-  }
+        .main-btn {
+            margin-top: 25px;
+            width: 80%;
+            padding: 12px;
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-  void _checkWin() {
-    // አግድም (Rows)
-    for (int i = 0; i < 25; i += 5) {
-      if (selected[i] && selected[i + 1] && selected[i + 2] && selected[i + 3] && selected[i + 4]) {
-        hasWon = true;
-      }
-    }
-    // ቁልቁል (Columns)
-    for (int i = 0; i < 5; i++) {
-      if (selected[i] && selected[i + 5] && selected[i + 10] && selected[i + 15] && selected[i + 20]) {
-        hasWon = true;
-      }
-    }
-    // ሰያፍ (Diagonals)
-    if (selected[0] && selected[6] && selected[12] && selected[18] && selected[24]) hasWon = true;
-    if (selected[4] && selected[8] && selected[12] && selected[16] && selected[20]) hasWon = true;
+        /* ስም መመዝገቢያ (ቴሌግራም ስሙን ካላገኘው ብቻ) */
+        #registration {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--tg-theme-bg-color);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
 
-    // አራቱ ማዕዘኖች (Four Corners) - አዲስ የተጨመረ
-    if (selected[0] && selected[4] && selected[20] && selected[24]) hasWon = true;
-  }
+    <div id="registration">
+        <h2>እንኳን ደህና መጡ!</h2>
+        <input type="text" id="nameInput" placeholder="ስምዎን ያስገቡ" 
+               style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 70%;">
+        <button class="main-btn" onclick="saveName()">ጨዋታውን ጀምር</button>
+    </div>
 
-  void _showRules() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("የጨዋታ ደንብ"),
-        content: const Text(
-            "• በአግድም ወይም በቁልቁል 5 መስመር መሙላት።\n"
-            "• በሰያፍ (Diagonal) 5 መስመር መሙላት።\n"
-            "• አራቱንም የቦርዱ ማዕዘኖች (Corners) መሙላት።\n\n"
-            "ከእነዚህ አንዱን ሲያሟሉ 'ቢንጎ!' ይባላል።"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("ገባኝ"))
-        ],
-      ),
-    );
-  }
+    <div class="header">
+        <div class="user-info" id="userNameDisplay">ቢንጎ</div>
+        <button class="rules-btn" onclick="showRules()">የጨዋታ ደንብ</button>
+    </div>
 
-  @override
-  Widget build(BuildContext context) {
-    // ስም ካልተመዘገበ የምዝገባ ገጽ አሳይ
-    if (userName == null) {
-      return Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("እንኳን ወደ ቢንጎ ጨዋታ በደህና መጡ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: "ስምዎን ያስገቡ", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => _saveUser(_nameController.text),
-                  child: const Text("ጨዋታውን ጀምር"),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-    }
+    <div id="status"></div>
 
-    // ዋናው የጨዋታ ገጽ
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("የቢንጎ ጨዋታ - ሰላም $userName"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: "የጨዋታ ደንብ",
-            onPressed: _showRules,
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          if (hasWon)
-            const Text("🎉 ቢንጎ! አሸንፈዋል! 🎉", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green)),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
-                itemCount: 25,
-                itemBuilder: (context, index) {
-                  bool isFree = index == 12;
-                  return GestureDetector(
-                    onTap: () => _toggleCell(index),
-                    child: Container(
-                      margin: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: selected[index] ? Colors.orange : Colors.blue[100],
-                        border: Border.all(color: Colors.blue),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          isFree ? "FREE" : "${board[index]}",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: selected[index] ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: ElevatedButton(
-              onPressed: _generateBoard,
-              child: const Text("አዲስ ጨዋታ ጀምር"),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+    <div class="grid" id="bingoBoard"></div>
+
+    <button class="main-btn" onclick="generateBoard()">አዲስ ጨዋታ</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // ዊንዶው እንዲሰፋ ማድረግ
+
+        let board = [];
+        let selected = Array(25).fill(false);
+        let hasWon = false;
+
+        window.onload = () => {
+            // 1. መጀመሪያ ከቴሌግራም ስም ለመውሰድ መሞከር
+            let name = "";
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                name = tg.initDataUnsafe.user.first_name;
+            } else {
+                // 2. ካልተገኘ ከ LocalStorage መፈለግ
+                name = localStorage.getItem('bingo_user_name');
+            }
+
+            if (name) {
+                startGame(name);
+            } else {
+                document.getElementById('registration').style.display = 'flex';
+            }
+        };
+
+        function saveName() {
+            const inputName = document.getElementById('nameInput').value;
+            if (inputName) {
+                localStorage.setItem('bingo_user_name', inputName);
+                startGame(inputName);
+            }
+        }
+
+        function startGame(name) {
+            document.getElementById('registration').style.display = 'none';
+            document.getElementById('userNameDisplay').innerText = "ሰላም " + name;
+            generateBoard();
+        }
+
+        function generateBoard() {
+            let nums = Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+            board = nums.slice(0, 25);
+            selected = Array(25).fill(false);
+            selected[12] = true; // FREE Space (Center)
+            hasWon = false;
+            document.getElementById('status').innerText = "";
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('bingoBoard');
+            boardEl.innerHTML = "";
+            board.forEach((num, i) => {
+                const cell = document.createElement('div');
+                cell.className = `cell ${selected[i] ? 'selected' : ''} ${i === 12 ? 'free' : ''}`;
+                cell.innerText = i === 12 ? "FREE" : num;
+                cell.onclick = () => toggleCell(i);
+                boardEl.appendChild(cell);
+            });
+        }
+
+        function toggleCell(i) {
+            if (hasWon) return;
+            selected[i] = !selected[i];
+            
+            // የቴሌግራም ንዝረት (Haptic Feedback) ለመጨመር
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+            
+            checkWin();
+            renderBoard();
+        }
+
+        function checkWin() {
+            const winPatterns = [
+                [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24], // Rows
+                [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], // Cols
+                [0,6,12,18,24], [4,8,12,16,20], // Diagonals
+                [0,4,20,24] // Four Corners
+            ];
+
+            if (winPatterns.some(pattern => pattern.every(idx => selected[idx]))) {
+                hasWon = true;
+                document.getElementById('status').innerText = "🎉 ቢንጎ! አሸንፈዋል! 🎉";
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            }
+        }
+
+        function showRules() {
+            tg.showAlert("የጨዋታ ደንብ:\n\n• በአግድም፣ ቁልቁል ወይም በሰያፍ 5 መስመር መሙላት።\n• አራቱንም ማዕዘኖች መሙላት።\n\nእነዚህን ሲያሟሉ ያሸንፋሉ!");
+        }
+    </script>
+</body>
+</html>
