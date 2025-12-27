@@ -36,7 +36,6 @@ class _BingoAuthWrapperState extends State<BingoAuthWrapper> {
   @override
   void initState() {
     super.initState();
-    // የተቀመጠ ስም ካለ መፈለግ
     userName = html.window.localStorage['bingo_user_name'];
   }
 
@@ -187,11 +186,12 @@ class _BingoGamePageState extends State<BingoGamePage> {
   void _checkWin() {
     bool win = false;
     for (int i = 0; i < 5; i++) {
-      if (board.skip(i * 5).take(5).every((c) => c.isMarked)) win = true; 
-      if ([0, 5, 10, 15, 20].every((j) => board[i + j].isMarked)) win = true; 
+      if (board.skip(i * 5).take(5).every((c) => c.isMarked)) win = true;
+      if ([0, 5, 10, 15, 20].every((j) => board[i + j].isMarked)) win = true;
     }
     if ([0, 6, 12, 18, 24].every((i) => board[i].isMarked)) win = true;
     if ([4, 8, 12, 16, 20].every((i) => board[i].isMarked)) win = true;
+    
     if (board[0].isMarked && board[4].isMarked && board[20].isMarked && board[24].isMarked) win = true;
 
     if (win) {
