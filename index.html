@@ -1,164 +1,243 @@
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ARIF BINGO - Dual Language</title>
-    <style>
-        :root { --gold: #facc15; --blue: #1e40af; --dark: #020617; --red: #ef4444; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; overflow: hidden; height: 100vh; }
-        
-        /* Language Selection */
-        #langOverlay { position: fixed; inset: 0; background: var(--dark); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .lang-btn { background: var(--gold); color: black; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin: 10px; width: 200px; border: none; font-size: 1.2rem; }
+import 'package:flutter/material.dart';
+import 'dart:math';
+import 'dart:html' as html; // ለዳርትፓድ LocalStorage ለመጠቀም
 
-        /* Dashboard */
-        #dashboard { display: none; flex-direction: column; height: 100vh; padding: 15px; box-sizing: border-box; }
-        .logo { font-size: 2.5rem; font-weight: 900; color: var(--gold); text-align: center; margin: 10px 0; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-item { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; text-align: center; cursor: pointer; font-size: 0.9rem; }
-        .menu-item:active { border-color: var(--gold); }
-        .play-main { background: var(--gold); color: black; padding: 18px; border-radius: 50px; font-weight: bold; font-size: 1.4rem; margin: 20px 0; border: none; width: 100%; }
+void main() {
+  runApp(const BingoApp());
+}
 
-        /* Game Page */
-        #gamePage { display: none; flex-direction: column; height: 100vh; padding: 10px; box-sizing: border-box; }
-        .caller-box { height: 18%; background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 15px; border: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; position: relative; }
-        .c-val { font-size: 3.5rem; font-weight: 900; }
-        .c-let { font-size: 1.2rem; color: var(--gold); position: absolute; top: 5px; left: 15px; }
+class BingoApp extends StatelessWidget {
+  const BingoApp({super.key});
 
-        /* Bingo Table */
-        .grid-container { height: 70%; display: flex; flex-direction: column; justify-content: center; }
-        .h-row { display: grid; grid-template-columns: repeat(5, 1fr); margin-bottom: 5px; }
-        .h-let { text-align: center; color: var(--gold); font-weight: bold; font-size: 1.4rem; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
-        .cell { aspect-ratio: 1/1; background: white; color: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; }
-        .cell.marked { background: var(--red) !important; color: white !important; }
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
+      ),
+      home: const BingoAuthWrapper(),
+    );
+  }
+}
 
-        /* Alerts */
-        #gameAlert { height: 25px; font-size: 0.8rem; color: var(--gold); text-align: center; margin-top: 5px; }
+// የተጠቃሚ ምዝገባን የሚቆጣጠር ክፍል
+class BingoAuthWrapper extends StatefulWidget {
+  const BingoAuthWrapper({super.key});
 
-        /* Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; padding: 20px; flex-direction: column; align-items: center; justify-content: center; }
-        .modal-card { background: #1e293b; width: 90%; padding: 20px; border-radius: 20px; border: 2px solid var(--gold); text-align: center; }
-        .pay-icon { width: 45%; padding: 10px; margin: 5px; border-radius: 10px; border: 1px solid #444; background: #0f172a; cursor: pointer; display: inline-block; }
-    </style>
-</head>
-<body>
+  @override
+  State<BingoAuthWrapper> createState() => _BingoAuthWrapperState();
+}
 
-    <div id="langOverlay">
-        <div class="logo">ARIF BINGO</div>
-        <button class="lang-btn" onclick="setLang('am')">አማርኛ</button>
-        <button class="lang-btn" onclick="setLang('en')">English</button>
-    </div>
+class _BingoAuthWrapperState extends State<BingoAuthWrapper> {
+  String? userName;
 
-    <div id="dashboard">
-        <div class="logo">ARIF BINGO</div>
-        <div style="text-align:center; color:var(--gold); margin-bottom:15px;"><span id="tBal">ቀሪ ሂሳብ</span>: <span id="balance">0.00</span> ETB</div>
-        
-        <div class="menu-grid">
-            <div class="menu-item" onclick="showModal('reg')">👤 <span id="tReg">መመዝገቢያ</span></div>
-            <div class="menu-item" onclick="showModal('pay')">💰 <span id="tPay">ሂሳብ ሙላ</span></div>
-            <div class="menu-item" onclick="showModal('help')">❓ <span id="tHelp">እርዳታ</span></div>
-            <div class="menu-item" onclick="showModal('with')">💸 <span id="tWith">ገንዘብ አውጣ</span></div>
-            <div class="menu-item" style="grid-column: span 2;" onclick="showModal('bonus')">🎁 <span id="tBon">የ10+1 ነጻ ጉርሻ</span></div>
-        </div>
+  @override
+  void initState() {
+    super.initState();
+    // የተቀመጠ ስም ካለ መፈተሽ (Persistence logic)
+    userName = html.window.localStorage['bingo_user_name'];
+  }
 
-        <button class="play-main" id="tPlayBtn" onclick="tryPlay()">ተጫወት (PLAY)</button>
-    </div>
+  void _saveUser(String name) {
+    html.window.localStorage['bingo_user_name'] = name;
+    setState(() {
+      userName = name;
+    });
+  }
 
-    <div id="gamePage">
-        <div class="caller-box">
-            <span class="c-let" id="curL">B</span>
-            <div class="c-val" id="curN">--</div>
-        </div>
-        <div class="grid-container">
-            <div class="h-row">
-                <div class="h-let">B</div><div class="h-let">I</div><div class="h-let">N</div><div class="h-let">G</div><div class="h-let">O</div>
-            </div>
-            <div class="grid" id="bingoGrid"></div>
-            <div id="gameAlert"></div>
-        </div>
-        <button onclick="location.reload()" style="background:none; border:1px solid gray; color:gray; padding:8px; border-radius:5px; width:50%; margin: 0 auto;">Back/ተመለስ</button>
-    </div>
+  @override
+  Widget build(BuildContext context) {
+    if (userName == null) {
+      return RegistrationPage(onRegister: _saveUser);
+    }
+    return BingoGamePage(userName: userName!);
+  }
+}
 
-    <div id="modal" class="modal">
-        <div class="modal-card" id="mContent"></div>
-        <button onclick="closeModal()" style="margin-top:20px; background:var(--red); color:white; border:none; padding:10px 30px; border-radius:10px;">ዝጋ / Close</button>
-    </div>
+// የምዝገባ ገጽ
+class RegistrationPage extends StatelessWidget {
+  final Function(String) onRegister;
+  RegistrationPage({super.key, required this.onRegister});
 
-    <script>
-        let balance = 0, isReg = false, lang = 'am', called = [];
-        const texts = {
-            am: {bal:"ቀሪ ሂሳብ", reg:"መመዝገቢያ", pay:"ሂሳብ ሙላ", help:"እርዳታ", with:"ገንዘብ አውጣ", bon:"የ10+1 ነጻ ጉርሻ", play:"ተጫወት", noBal:"በቂ ሂሳብ የሎትም! እባክዎ ሂሳብ ይሙሉ", noCall:"ይህ ቁጥር ገና አልወጣም!", bonus:"10 ጊዜ ሲጫወቱ 1 ነጻ ያገኛሉ።"},
-            en: {bal:"Balance", reg:"Register", pay:"Deposit", help:"Help", with:"Withdraw", bon:"10+1 Bonus", play:"Play", noBal:"Insufficient balance! Please deposit", noCall:"Number not called yet!", bonus:"Play 10 times and get 1 free game."}
-        };
+  final TextEditingController _controller = TextEditingController();
 
-        function setLang(l) {
-            lang = l;
-            document.getElementById('langOverlay').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'flex';
-            ['tBal','tReg','tPay','tHelp','tWith','tBon','tPlayBtn'].forEach(id => {
-                let key = id.replace('t','').toLowerCase();
-                if(id === 'tPlayBtn') key = 'play';
-                document.getElementById(id).innerText = texts[lang][key];
-            });
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("እንኳን ወደ ቢንጎ ጨዋታ መጡ", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _controller,
+                decoration: const InputDecoration(
+                  labelText: "ስምዎን ያስገቡ",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_controller.text.isNotEmpty) {
+                    onRegister(_controller.text);
+                  }
+                },
+                child: const Text("ይመዝገቡ"),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BingoCell {
+  final int number;
+  bool isMarked;
+  final bool isFreeSpace;
+  BingoCell({required this.number, this.isMarked = false, this.isFreeSpace = false});
+}
+
+class BingoGamePage extends StatefulWidget {
+  final String userName;
+  const BingoGamePage({super.key, required this.userName});
+
+  @override
+  State<BingoGamePage> createState() => _BingoGamePageState();
+}
+
+class _BingoGamePageState extends State<BingoGamePage> {
+  List<BingoCell> board = [];
+  List<int> drawnNumbers = [];
+  int? currentNumber;
+  bool hasWon = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateBoard();
+  }
+
+  void _generateBoard() {
+    setState(() {
+      board.clear();
+      drawnNumbers.clear();
+      currentNumber = null;
+      hasWon = false;
+      List<int> b = _rand(1, 15, 5);
+      List<int> i = _rand(16, 30, 5);
+      List<int> n = _rand(31, 45, 4);
+      List<int> g = _rand(46, 60, 5);
+      List<int> o = _rand(61, 75, 5);
+      for (int r = 0; r < 5; r++) {
+        board.add(BingoCell(number: b[r]));
+        board.add(BingoCell(number: i[r]));
+        if (r == 2) {
+          board.add(BingoCell(number: 0, isMarked: true, isFreeSpace: true));
+        } else {
+          board.add(BingoCell(number: r < 2 ? n[r] : n[r - 1]));
         }
+        board.add(BingoCell(number: g[r]));
+        board.add(BingoCell(number: o[r]));
+      }
+    });
+  }
 
-        function showModal(type) {
-            const mc = document.getElementById('mContent');
-            document.getElementById('modal').style.display = 'flex';
-            if(type==='pay') {
-                mc.innerHTML = `<h3>${texts[lang].pay}</h3>
-                <div class="pay-icon" onclick="this.innerHTML='0906420377'">Telebirr</div>
-                <div class="pay-icon" onclick="this.innerHTML='0906420377'">CBE Birr</div>
-                <p style="font-size:0.8rem; margin-top:10px;">አይከኑን ሲነኩ ቁጥሩ ይታያል</p>`;
-            } else if(type==='with') {
-                mc.innerHTML = `<h3>${texts[lang].with}</h3>
-                <input type="tel" placeholder="ገንዘብ የሚገባበት ስልክ ቁጥር" style="width:90%; padding:12px; border-radius:10px;"><br><br>
-                <input type="number" placeholder="መጠን (Amount)" style="width:90%; padding:12px; border-radius:10px;"><br><br>
-                <button class="lang-btn" style="width:100%">ጠይቅ (Request)</button>`;
-            } else if(type==='help') {
-                mc.innerHTML = `<h3>${texts[lang].help}</h3><p>${texts[lang].bonus}</p><p>አሸናፊ ለመሆን በካርድዎ ላይ ያሉትን ሁሉንም ቁጥሮች ማግኘት አለብዎት።</p>`;
-            } else if(type==='reg') {
-                mc.innerHTML = `<h3>${texts[lang].reg}</h3><input id="ph" type="tel" placeholder="09..." style="padding:10px; width:80%"><br><br><button onclick="isReg=true; closeModal()">Register</button>`;
-            } else if(type==='bonus') {
-                mc.innerHTML = `<h3>Bonus</h3><p>${texts[lang].bonus}</p>`;
-            }
-        }
+  List<int> _rand(int min, int max, int count) {
+    Set<int> nums = {};
+    while (nums.length < count) nums.add(min + Random().nextInt(max - min + 1));
+    return nums.toList();
+  }
 
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+  void _draw() {
+    if (hasWon || drawnNumbers.length >= 75) return;
+    int next;
+    do { next = 1 + Random().nextInt(75); } while (drawnNumbers.contains(next));
+    setState(() {
+      currentNumber = next;
+      drawnNumbers.add(next);
+      for (var c in board) { if (c.number == next) c.isMarked = true; }
+      _check();
+    });
+  }
 
-        function tryPlay() {
-            if(!isReg) { showModal('reg'); return; }
-            // Observe mode: even if balance is 0, they can enter
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('gamePage').style.display = 'flex';
-            startBingo();
-        }
+  void _check() {
+    // 1. ረድፎችን እና አምዶችን መፈተሽ
+    for (int i = 0; i < 5; i++) {
+      if (board.skip(i * 5).take(5).every((c) => c.isMarked)) _win(); // Row
+      if ([0, 5, 10, 15, 20].every((j) => board[i + j].isMarked)) _win(); // Col
+    }
+    // 2. ዲያጎናል (Diagonal) መፈተሽ
+    if ([0, 6, 12, 18, 24].every((i) => board[i].isMarked)) _win();
+    if ([4, 8, 12, 16, 20].every((i) => board[i].isMarked)) _win();
+    
+    // 3. አራት ማዕዘኖች (Four Corners) መፈተሽ
+    if (board[0].isMarked && board[4].isMarked && board[20].isMarked && board[24].isMarked) _win();
+  }
 
-        function startBingo() {
-            const grid = document.getElementById('bingoGrid'); grid.innerHTML = '';
-            let cols = [[],[],[],[],[]];
-            for(let i=0; i<5; i++) { while(cols[i].length < 5) { let r = Math.floor(Math.random()*15)+(i*15+1); if(!cols[i].includes(r)) cols[i].push(r); }}
-            for(let r=0; r<5; r++) {
-                for(let c=0; c<5; c++) {
-                    const cell = document.createElement('div'); cell.className = 'cell';
-                    let val = (r===2 && c===2) ? 'FREE' : cols[c][r];
-                    cell.innerText = val; if(val==='FREE') cell.classList.add('marked');
-                    cell.onclick = function() {
-                        if(balance < 10 && val!=='FREE') { alert(texts[lang].noBal); return; }
-                        if(val==='FREE' || called.includes(parseInt(val))) { this.classList.add('marked'); }
-                        else { document.getElementById('gameAlert').innerText = texts[lang].noCall; setTimeout(()=>document.getElementById('gameAlert').innerText='', 2000); }
-                    };
-                    grid.appendChild(cell);
-                }
-            }
-            setInterval(() => {
-                let n; do { n = Math.floor(Math.random()*75)+1; } while(called.includes(n));
-                called.push(n); let l = "BINGO"[Math.floor((n-1)/15)];
-                document.getElementById('curL').innerText = l; document.getElementById('curN').innerText = n;
-            }, 5000);
-        }
-    </script>
-</body>
-</html>
+  void _win() {
+    if (hasWon) return;
+    setState(() => hasWon = true);
+    showDialog(context: context, builder: (_) => AlertDialog(
+      title: const Text("ቢንጎ!"),
+      content: Text("እንኳን ደስ አለዎት ${widget.userName}! አሸንፈዋል!"),
+      actions: [TextButton(onPressed: () { Navigator.pop(context); _generateBoard(); }, child: const Text("እንደገና"))],
+    ));
+  }
+
+  void _showRules() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("የጨዋታ ደንብ"),
+        content: const Text(
+          "ማሸነፍ የሚቻለው የሚከተሉት ሲሟሉ ነው፡\n\n"
+          "1. በአግድም ወይም በቁልቁል ቀጥ ያለ መስመር መስራት ሲቻል\n"
+          "2. በዲያጎናል (ከማዕዘን እስከ ማዕዘን) መስመር መስራት ሲቻል\n"
+          "3. በሰንጠረዡ አራቱም ጫፎች ላይ ያሉትን ቁጥሮች ማግኘት ሲቻል"
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("እሺ"))],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("ተጫዋች: ${widget.userName}"),
+        actions: [
+          IconButton(onPressed: _showRules, icon: const Icon(Icons.info_outline)),
+          TextButton(onPressed: _showRules, child: const Text("የጨዋታ ደንብ", style: TextStyle(color: Colors.white))),
+        ],
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+      ),
+      body: Column(children: [
+        Container(width: double.infinity, padding: const EdgeInsets.all(20), color: Colors.indigo.shade50,
+          child: Column(children: [
+            Text(currentNumber == null ? "ለመጀመር ቁልፉን ይጫኑ" : "የተጠራው፡ $currentNumber", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text("የተጠሩ ቁጥሮች ብዛት፡ ${drawnNumbers.length}"),
+          ])),
+        Expanded(child: Padding(padding: const EdgeInsets.all(10), child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 5, mainAxisSpacing: 5),
+          itemCount: 25, itemBuilder: (_, i) => Container(
+            decoration: BoxDecoration(color: board[i].isMarked ? Colors.green : Colors.white, border: Border.all(color: Colors.indigo), borderRadius: BorderRadius.circular(5)),
+            child: Center(child: board[i].isFreeSpace ? const Icon(Icons.star, color: Colors.orange) : Text("${board[i].number}", style: TextStyle(color: board[i].isMarked ? Colors.white : Colors.black, fontWeight: FontWeight.bold))),
+          )))),
+        Padding(padding: const EdgeInsets.all(20), child: Row(children: [
+          Expanded(child: ElevatedButton(onPressed: hasWon ? null : _draw, child: const Text("ቁጥር ጥራ"))),
+          const SizedBox(width: 10),
+          ElevatedButton(onPressed: _generateBoard, child: const Text("እንደገና")),
+        ]))
+      ]),
+    );
+  }
+}
