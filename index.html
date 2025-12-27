@@ -1,66 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="am">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>አሪፍ ቢንጎ - Arif Bingo</title>
+    <title>Arif Bingo - አሪፍ ቢንጎ</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0d1117; color: white; text-align: center; margin: 0; padding: 10px; }
-        .header { background: #1f2937; padding: 15px; border-radius: 0 0 20px 20px; margin-bottom: 15px; border-bottom: 3px solid #facc15; }
-        .balance-box { font-size: 18px; color: #facc15; font-weight: bold; margin-bottom: 5px; }
+        :root { --primary: #facc15; --bg: #0f172a; --card-bg: #1e293b; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        /* Menu Buttons */
-        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .menu-item { background: #374151; padding: 8px; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid #4b5563; }
-        .menu-item:active { background: #facc15; color: black; }
+        /* Top Navigation */
+        .top-nav { background: #1e293b; padding: 15px; border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        .balance { color: var(--primary); font-weight: bold; font-size: 1.1rem; }
+        
+        /* Main Menu Grid */
+        .menu-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
+        .menu-btn { background: #334155; border: 1px solid #475569; padding: 10px 5px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+        .menu-btn:active { background: var(--primary); color: black; transform: translateY(2px); }
 
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 320px; margin: 0 auto; background: #1e3a8a; padding: 10px; border-radius: 10px; }
-        .cell { width: 100%; aspect-ratio: 1/1; background: white; color: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; border-radius: 5px; }
-        .cell.marked { background: #ef4444 !important; color: white !important; }
-        
-        .play-btn { margin-top: 15px; padding: 12px; background: #facc15; color: black; border: none; border-radius: 10px; font-weight: bold; width: 100%; font-size: 16px; }
+        /* Bingo Board Area */
+        .game-area { flex-grow: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .bingo-card { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #1e3a8a; padding: 12px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 4px solid #3b82f6; }
+        .cell { width: 55px; height: 55px; background: white; color: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 900; border-radius: 8px; cursor: pointer; position: relative; }
+        .cell.marked { background: #ef4444; color: white; animation: pop 0.3s ease; }
+        .cell.marked::after { content: '✘'; position: absolute; font-size: 2rem; opacity: 0.3; }
+
+        /* Action Buttons */
+        .action-area { padding: 20px; }
+        .main-btn { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(250, 204, 21, 0.3); }
+
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="balance-box">ቀሪ ሂሳብ: 0.00 ETB</div>
-        <div class="menu-grid">
-            <div class="menu-item" onclick="alert('በቅርቡ ይከፈታል')">ለመመዝገብ</div>
-            <div class="menu-item" onclick="alert('ገንዘብ ለማስገባት')">ገንዘብ አስገባ</div>
-            <div class="menu-item" onclick="alert('ገንዘብ ለማውጣት')">ገንዘብ አውጣ</div>
-            <div class="menu-item" onclick="alert('እርዳታ')">እርዳታ</div>
-            <div class="menu-item" onclick="location.reload()">Refresh</div>
-            <div class="menu-item" onclick="alert('Account Settings')">መገለጫ</div>
-        </div>
+    <div class="top-nav">
+        <div style="font-weight: bold;">አሪፍ ቢንጎ</div>
+        <div class="balance" id="wallet">0.00 ETB</div>
     </div>
 
-    <div class="grid" id="bingoGrid"></div>
-    <button class="play-btn" onclick="generateNewBoard()">አዲስ ካርድ ቀይር</button>
+    <div class="menu-container">
+        <div class="menu-btn" onclick="showMsg('ለመመዝገብ')">👤 መመዝገቢያ</div>
+        <div class="menu-btn" onclick="showMsg('ገንዘብ ለማስገባት')">💰 ማስገቢያ</div>
+        <div class="menu-btn" onclick="showMsg('ገንዘብ ለማውጣት')">💸 ማውጫ</div>
+        <div class="menu-btn" onclick="showMsg('የእርዳታ ገጽ')">❓ እርዳታ</div>
+        <div class="menu-btn" onclick="showMsg('የቀድሞ ጨዋታዎች')">📜 ታሪክ</div>
+        <div class="menu-btn" onclick="location.reload()">🔄 Refresh</div>
+    </div>
+
+    <div class="game-area">
+        <div class="bingo-card" id="card"></div>
+    </div>
+
+    <div class="action-area">
+        <button class="main-btn" onclick="newCard()">አዲስ ካርድ ግዛ (5.00 ETB)</button>
+    </div>
 
     <script>
-        function generateNewBoard() {
-            const grid = document.getElementById('bingoGrid');
-            grid.innerHTML = '';
-            let nums = [];
-            while(nums.length < 25) {
-                let r = Math.floor(Math.random() * 75) + 1;
-                if(!nums.includes(r)) nums.push(r);
-            }
-            nums.forEach((n, i) => {
-                const c = document.createElement('div');
-                c.className = 'cell';
-                if(i === 12) {
-                    c.innerText = 'FREE';
-                    c.classList.add('marked');
-                } else {
-                    c.innerText = n;
-                    c.onclick = function() { this.classList.toggle('marked'); };
+        function showMsg(title) { alert(title + " በቅርቡ ዝግጁ ይሆናል!"); }
+
+        function newCard() {
+            const card = document.getElementById('card');
+            card.innerHTML = '';
+            // ቢንጎ ቁጥሮች (B:1-15, I:16-30, N:31-45, G:46-60, O:61-75)
+            let columns = [[], [], [], [], []];
+            for(let i=0; i<5; i++) {
+                while(columns[i].length < 5) {
+                    let r = Math.floor(Math.random() * 15) + (i * 15 + 1);
+                    if(!columns[i].includes(r)) columns[i].push(r);
                 }
-                grid.appendChild(c);
-            });
+            }
+
+            for(let row=0; row<5; row++) {
+                for(let col=0; col<5; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    let val = columns[col][row];
+                    if(row === 2 && col === 2) {
+                        cell.innerText = 'FREE';
+                        cell.classList.add('marked');
+                    } else {
+                        cell.innerText = val;
+                        cell.onclick = function() { this.classList.toggle('marked'); };
+                    }
+                    card.appendChild(cell);
+                }
+            }
         }
-        generateNewBoard();
+        newCard();
     </script>
 </body>
 </html>
